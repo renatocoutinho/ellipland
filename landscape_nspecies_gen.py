@@ -8,7 +8,7 @@ if '.' not in sys.path:
 from landscape import *
 
 parn = OrderedDict([
-    ('n', 2),
+#    ('n', 2),
     ('rp', [0.1, 0.]),
     ('rm', [-0.01, 0.1]),
     ('alphap', [[1., 1.], [2., 2.]]),
@@ -39,7 +39,6 @@ def solve_landscape_nspecies(landscape, par, dx, f_tol=None, verbose=True):
     landscape : a 2-d array (of ints) describing the landscape, with 1 on
         patches and 0 on matrix
     par : a ordered dict containing parameters in the following order:
-        n: number of species
         r: list of reproductive rates on patches
         alpha: matrix of interaction parameters on patches (diagonals are minus the inverse of carrying capacity) 
         mu: list of mortality rates in the matrix
@@ -95,9 +94,10 @@ def solve_landscape_nspecies(landscape, par, dx, f_tol=None, verbose=True):
     from scipy.optimize import newton_krylov
 
     # change this ugly hack for another
-    (n, rp, rm, alphap, alpham, Dp, Dm, g, (al, bl, cl), (ar, br, cr), (at, bt, ct), (ab, bb,
+    (rp, rm, alphap, alpham, Dp, Dm, g, (al, bl, cl), (ar, br, cr), (at, bt, ct), (ab, bb,
         cb)) = par.values()
 
+    n = len(rp)
     rp = array(rp)
     rm = array(rm)
     alphap = - array(alphap)
