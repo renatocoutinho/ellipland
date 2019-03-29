@@ -280,6 +280,12 @@ def random_landscape(cover, frag, size, radius=1, norm='taxicab'):
     -------
     landscape : a square 2-d array of zeroes and ones
 
+    Reference
+    ---------
+    Lenore Fahrig, Relative Effects of Habitat Loss and Fragmentation on
+    Population Extinction, The Journal of Wildlife Management, Vol. 61, No. 3
+    (Jul., 1997), pp. 603-610
+
     '''
     from numpy.random import rand, randint
 
