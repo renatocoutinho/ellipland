@@ -10,7 +10,8 @@ Welcome to documentation on EllipLand!
     landscape_generic
     analise
     area_frag
-    create_habitat
+
+.. create_habitat
 
 Indices and tables
 ==================
