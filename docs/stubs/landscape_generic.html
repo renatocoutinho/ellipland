@@ -1,0 +1,187 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>landscape_generic &#8212; Landscape Solver  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-landscape_generic">
+<span id="landscape-generic"></span><h1>landscape_generic<a class="headerlink" href="#module-landscape_generic" title="Permalink to this headline">¶</a></h1>
+<p>Single species, multiple types of patch and matrix.</p>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#landscape_generic.find_interfaces" title="landscape_generic.find_interfaces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_interfaces</span></code></a>(landscape)</td>
+<td>Helper function that marks where are the internal boundaries.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#landscape_generic.solve_landscape_generic" title="landscape_generic.solve_landscape_generic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_landscape_generic</span></code></a>(landscape,&nbsp;par,&nbsp;dx)</td>
+<td>Find the stationary solution for a given landscape and set of parameters.</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="landscape_generic.find_interfaces">
+<code class="descclassname">landscape_generic.</code><code class="descname">find_interfaces</code><span class="sig-paren">(</span><em>landscape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape_generic.html#find_interfaces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape_generic.find_interfaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function that marks where are the internal boundaries.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="landscape_generic.solve_landscape_generic">
+<code class="descclassname">landscape_generic.</code><code class="descname">solve_landscape_generic</code><span class="sig-paren">(</span><em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape_generic.html#solve_landscape_generic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape_generic.solve_landscape_generic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the stationary solution for a given landscape and set of parameters.</p>
+<p>Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
+stationary solution (or the solution to the elliptical problem) to the
+system of equations in 2 dimensions (x is a 2-d vector):</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}u_{i_t}(x) &amp;= D_i \nabla^2 u_i(x) + ru(1-u(x)/K) = 0 \text{, in a patch} \\
+v_t(x) &amp;= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{, in the matrix}\end{split}\]</div>
+<dl class="docutils">
+<dt>landscape <span class="classifier-delimiter">:</span> <span class="classifier">a 2-d array (of ints) describing the landscape, with 1 on</span></dt>
+<dd>patches and 0 on matrix</dd>
+<dt>par <span class="classifier-delimiter">:</span> <span class="classifier">a ordered dict containing parameters in the following order: </span></dt>
+<dd><p class="first">r: reproductive rate on patches
+K: carrying capacity on patches
+mu: mortality rate in the matrix
+Dp: diffusivity on patches
+Dm: diffusivity in the matrix
+g: habitat preference parameter gamma, usually less than one. See</p>
+<blockquote>
+<div>interface conditions below</div></blockquote>
+<p class="last">left: (a, b, c): external boundary conditions at left border
+right: (a, b, c): external boundary conditions at right border
+top: (a, b, c): external boundary conditions at top border
+bottom: (a, b, c): external boundary conditions at bottom border</p>
+</dd>
+</dl>
+<p>dx : lenght of each edge
+f_tol : float, tolerance for the residue, passed on to the solver routine.</p>
+<blockquote>
+<div>Default is 6e-6</div></blockquote>
+<p>verbose : print residue of the solution and its maximum and minimum values</p>
+<dl class="docutils">
+<dt>solution <span class="classifier-delimiter">:</span> <span class="classifier">2-d array of the same shape of the landscape input containing</span></dt>
+<dd>the solution</dd>
+</dl>
+<p>External boundaries are of the form</p>
+<div class="math notranslate nohighlight">
+\[a \nabla u \cdot \hat{n} + b u + c = 0\]</div>
+<p>and may be different for left, right, top, bottom.  The derivative of u is
+taken along the normal to the boundary.</p>
+<p>The interfaces between patches and matrix are given by</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}u(x) &amp;= \gamma v(x) \\
+D_p \nabla u(x) \cdot \hat{n} &amp;= D_m \nabla v(x) \cdot \hat{n}\end{split}\]</div>
+<p>where u is a patch and v is the solution in the matrix. These conditions
+are handled using an assymetric finite difference scheme for the 2nd
+derivative:</p>
+<div class="math notranslate nohighlight">
+\[u_xx(x) = (4/3/h**2) (u(x-h) - 3 u(x) + 2 u(x+h/2))\]</div>
+<p>with the approximations at the interface:</p>
+<div class="math notranslate nohighlight">
+\[u(x+h/2) = (Dm*v(x+h)+Dp*u(x))/(Dp+Dm*g)\]</div>
+<p>if u(x) is in a patch and v(x+h) is in the matrix, or</p>
+<div class="math notranslate nohighlight">
+\[v(x+h/2) = g*(Dm*v(x)+Dp*u(x+h))/(Dp+Dm*g)\]</div>
+<p>if v(x) is in the matrix and u(x+h) is in a patch.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Landscape Solver</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Renato Coutinho.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/stubs/landscape_generic.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
