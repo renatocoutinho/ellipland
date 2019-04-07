@@ -1,5 +1,5 @@
-# this is a version of landscape_nspecies where species can be
-# generalists, that is, it is able to reproduce in the matrix
+'''Multi-species, one type of patch and matrix. It makes possible for the
+matrix to be favorable for species (a generalist).'''
 
 # hack to make rPython work
 import sys
@@ -31,8 +31,9 @@ def solve_landscape_nspecies(landscape, par, dx, f_tol=None, verbose=True):
     stationary solution (or the solution to the elliptical problem) to the
     system of 2n equations in 2 dimensions (x is a 2-d vector):
 
-        \frac{\partial u_i}{\partial t} = D_p \\nabla^2 u_i + r_i u_i (1-\sum_{j=1}^n \alpha_j u_j) = 0 , where x is in a patch
-        \frac{\partial v_i}{\partial t} = D_m \\nabla^2 v_i - \mu_i v_i = 0 , where x is in the matrix
+    .. math::
+        \\frac{\partial u_i}{\partial t} &= D_p \\nabla^2 u_i + r_i u_i (1-\sum_{j=1}^n \\alpha_j u_j) = 0 \\text{ in a patch} \\\\
+        \\frac{\partial v_i}{\partial t} &= D_m \\nabla^2 v_i - \mu_i v_i = 0 \\text{ in the matrix}
 
     Parameters
     ----------
@@ -44,15 +45,14 @@ def solve_landscape_nspecies(landscape, par, dx, f_tol=None, verbose=True):
         mu: list of mortality rates in the matrix
         Dp: list of diffusivities on patches
         Dm: list of diffusivities in the matrix
-        g: habitat preference parameter \gamma, usually less than one. See
-            interface conditions below
+        g: habitat preference parameter \gamma, usually less than one. See interface conditions below
         left: (a, b, c): external boundary conditions at left border
         right: (a, b, c): external boundary conditions at right border
         top: (a, b, c): external boundary conditions at top border
         bottom: (a, b, c): external boundary conditions at bottom border
+
     dx : lenght of each edge
-    f_tol : float, tolerance for the residue, passed on to the solver routine.
-        Default is 6e-6
+    f_tol : float, tolerance for the residue, passed on to the solver routine. Default is 6e-6
     verbose : print residue of the solution and its maximum and minimum values
 
     Returns
@@ -64,28 +64,33 @@ def solve_landscape_nspecies(landscape, par, dx, f_tol=None, verbose=True):
     ---------------------------------
     External boundaries are of the form
 
-        a \\nabla u \dot \hat{n} + b u + c = 0
+    .. math::
+        a \\nabla u \cdot \hat{n} + b u + c = 0
 
     and may be different for left, right, top, bottom.  The derivative of u is
     taken along the normal to the boundary.
 
     The interfaces between patches and matrix are given by
-        
-        u(x) = \gamma v(x)
-        D_p \\nabla u(x) \dot \hat{n} = D_m \\nabla v(x) \dot \hat{n}
+
+    .. math::
+        u(x) &= \gamma v(x) \\\\
+        D_p \\nabla u(x) \cdot \hat{n} &= D_m \\nabla v(x) \cdot \hat{n}
 
     where u is a patch and v is the solution in the matrix. These conditions
     are handled using an assymetric finite difference scheme for the 2nd
     derivative:
 
+    .. math::
         u_xx(x) = (4/3/h**2) (u(x-h) - 3 u(x) + 2 u(x+h/2))
 
     with the approximations at the interface:
 
+    .. math::
         u(x+h/2) = (Dm*v(x+h)+Dp*u(x))/(Dp+Dm*g)
 
     if u(x) is in a patch and v(x+h) is in the matrix, or
 
+    .. math::
         v(x+h/2) = g*(Dm*v(x)+Dp*u(x+h))/(Dp+Dm*g)
 
     if v(x) is in the matrix and u(x+h) is in a patch.

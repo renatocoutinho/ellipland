@@ -1,3 +1,4 @@
+'''Analyze fragmentation by solving random landscapes.'''
 from numpy import *
 from multiprocessing import Pool
 from pickle import load, dump

@@ -1,3 +1,4 @@
+'''Habitat creatin using cython. (incomplete)'''
 import numpy as np
 # "cimport" is used to import special compile-time information
 # about the numpy module (this is stored in a file numpy.pxd which is

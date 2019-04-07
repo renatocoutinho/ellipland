@@ -1,3 +1,4 @@
+'''Single species, one type of patch and matrix - basic module.'''
 from numpy import *
 from collections import OrderedDict
 from itertools import product as iproduct
@@ -49,8 +50,9 @@ def solve_landscape(landscape, par, dx, f_tol=None, verbose=True):
     stationary solution (or the solution to the elliptical problem) to the
     system of equations in 2 dimensions (x is a 2-d vector):
 
-        u_t(x) = D_p \\nabla^2 u(x) + ru(1-u(x)/K) = 0 , where x is in a patch
-        v_t(x) = D_m \\nabla^2 v(x) - \mu v(x) = 0 , where x is in the matrix
+    .. math::
+        u_t(x) &= D_p \\nabla^2 u(x) + ru(1-u(x)/K) = 0 \\text{ in a patch} \\\\
+        v_t(x) &= D_m \\nabla^2 v(x) - \mu v(x) = 0 \\text{ in the matrix}
 
     Parameters
     ----------
@@ -82,29 +84,34 @@ def solve_landscape(landscape, par, dx, f_tol=None, verbose=True):
     ---------------------------------
     External boundaries are of the form
 
-        a \\nabla u \dot \hat{n} + b u + c = 0
+    .. math::
+        a \\nabla u \cdot \hat{n} + b u + c = 0
 
     and may be different for left, right, top, bottom.  The derivative of u is
     taken along the normal to the boundary.
 
     The interfaces between patches and matrix are given by
         
-        u(x) = \gamma v(x)
-        D_p \\nabla u(x) \dot \hat{n} = D_m \\nabla v(x) \dot \hat{n}
+    .. math::
+        u(x) &= \gamma v(x) \\\\
+        D_p \\nabla u(x) \cdot \hat{n} &= D_m \\nabla v(x) \cdot \hat{n}
 
     where u is a patch and v is the solution in the matrix. These conditions
     are handled using an assymetric finite difference scheme for the 2nd
     derivative:
 
-        u_xx(x) = (4/3/h**2) (u(x-h) - 3 u(x) + 2 u(x+h/2))
+    .. math::
+        u_xx(x) = \\frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))
 
     with the approximations at the interface:
 
-        u(x+h/2) = (Dm*v(x+h)+Dp*u(x))/(Dp+Dm*g)
+    .. math::
+        u(x+h/2) = \\frac{D_m v(x+h)+D_p u(x)}{(D_p+D_m g}
 
     if u(x) is in a patch and v(x+h) is in the matrix, or
 
-        v(x+h/2) = g*(Dm*v(x)+Dp*u(x+h))/(Dp+Dm*g)
+    .. math::
+        v(x+h/2) = \\frac{g(D_m v(x)+D_p u(x+h))}{D_p+D_m g}
 
     if v(x) is in the matrix and u(x+h) is in a patch.
 
@@ -227,6 +234,61 @@ def solve_multiple_parameters(variables, values, landscape, par, dx, f_tol=None,
         cpus = cpu_count()
         pool = Pool(cpus if cpus == 1 else cpus - 1)
         solutions = pool.map(solve_landscape_wrapper, works)
+        pool.close()
+        pool.join()
+    else:
+        solutions = map(solve_landscape_wrapper, works)
+
+    return solutions
+
+def solve_multiple_landscapes(landscapes, par, dx, f_tol=None, verbose=True,
+        multiprocess=True):
+    '''Solve several landscapes.
+
+    Solves a set of landscape with a given set of parameters, optionally using
+    multiprocessing to speed things up.
+
+    Parameters
+    ----------
+    landscape : list of 2-d array of zeroes and ones describing the landscape
+    par : values for all the problem parameters. See documentation for
+        `solve_landscape()`
+    dx : lenght of each edge
+    f_tol : float, tolerance for the residue, passed on to the solver routine.
+        Default is 6e-6
+    verbose : print residue of the solution and its maximum and minimum values.
+        Notice that the order of appearance of each output is not the same as
+        the input if multiprocess is True.
+    multiprocess : determines whether to use multiprocessing to use multiple
+        cores. True by default, in which case the total number of CPUs minus
+        one are used
+
+    Returns
+    -------
+    solutions : list containing the solutions to each landscape, in the same
+        ordering of the input values
+
+    Example
+    -------
+    >>> from landscape import *
+    >>> lA = image_to_landscape('landA.tif')
+    >>> lB = image_to_landscape('landB.tif')
+    >>> lC = image_to_landscape('landC.tif')
+    >>> ll = [lA, B, lC]
+    >>> sols = solve_multiple_parameters(ll, par, dx)
+
+    '''
+    from functools import partial
+    # this is not compatible with python 2.6 when using multiprocessing, due to
+    # bug http://bugs.python.org/issue5228
+    solve_landscape_wrapper = partial(solve_landscape, par=par, dx=dx,
+            f_tol=f_tol, verbose=verbose)
+
+    if multiprocess:
+        from multiprocessing import Pool, cpu_count
+        cpus = cpu_count()
+        pool = Pool(cpus if cpus == 1 else cpus - 1)
+        solutions = pool.map(solve_landscape_wrapper, ll)
         pool.close()
         pool.join()
     else:

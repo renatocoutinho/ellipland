@@ -1,3 +1,4 @@
+'''A few analysis tools: interpolation, borders etc. (outdated)'''
 from landscape import *
 
 def interpolate_nodata(land, nodata, matrix=None, radius=1):
@@ -52,7 +53,7 @@ def find_rotation(land, nodata):
     from scipy.ndimage.interpolation import rotate
     a = where(land[0,:] != nodata)[0][0]
     b = where(land[:,0] != nodata)[0][0]
-    print a, b
+    print(a, b)
     return -rad2deg(arctan2(b, a))
 
 def find_best_pos(land, nodata):
