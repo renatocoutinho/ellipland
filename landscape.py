@@ -1,11 +1,10 @@
 '''Single species, one type of patch and matrix - basic module.'''
-from numpy import *
+import numpy as np
 from collections import OrderedDict
 from itertools import product as iproduct
-from scipy.ndimage import label
 
 try:
-    from matplotlib.pyplot import *
+    from matplotlib import pyplot as plt
 except ImportError:
     pass
 
@@ -43,81 +42,96 @@ dx = 0.02
 # mu: 1/30 days ~ 0.03 day^-1
 
 
-def solve_landscape(landscape, par, dx, f_tol=None, verbose=True):
-    '''Find the stationary solution for a given landscape and set of parameters.
+def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbose=True):
+    r"""Find the stationary solution for a given landscape and set of parameters.
 
     Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
     stationary solution (or the solution to the elliptical problem) to the
     system of equations in 2 dimensions (x is a 2-d vector):
 
     .. math::
-        u_t(x) &= D_p \\nabla^2 u(x) + ru(1-u(x)/K) = 0 \\text{ in a patch} \\\\
-        v_t(x) &= D_m \\nabla^2 v(x) - \mu v(x) = 0 \\text{ in the matrix}
+        u_t(x) &= D_p \nabla^2 u(x) + ru(1-u(x)/K) = 0 \text{ in a patch} \\
+        v_t(x) &= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{ in the matrix}
 
     Parameters
     ----------
+    landscape : 2-d array of ints
+        describe the landscape, with 1 on patches and 0 on matrix
+    par : ordered dict
+        parameters in the following order: 
 
-    landscape : a 2-d array (of ints) describing the landscape, with 1 on
-        patches and 0 on matrix
-    par : a ordered dict containing parameters in the following order: 
-        r: reproductive rate on patches
-        K: carrying capacity on patches
-        mu: mortality rate in the matrix
-        Dp: diffusivity on patches
-        Dm: diffusivity in the matrix
-        g: habitat preference parameter \gamma, usually less than one. See
-            interface conditions below
-        left: (a, b, c): external boundary conditions at left border
-        right: (a, b, c): external boundary conditions at right border
-        top: (a, b, c): external boundary conditions at top border
-        bottom: (a, b, c): external boundary conditions at bottom border
-    dx : lenght of each edge
-    f_tol : float, tolerance for the residue, passed on to the solver routine.
-        Default is 6e-6
-    verbose : print residue of the solution and its maximum and minimum values
+        - r : reproductive rate on patches
+        - K : carrying capacity on patches
+        - mu : mortality rate in the matrix
+        - Dp : diffusivity on patches
+        - Dm : diffusivity in the matrix
+        - g : habitat preference parameter \gamma, usually less than one. See interface conditions below
+        - left : (a, b, c): external boundary conditions at left border
+        - right : (a, b, c): external boundary conditions at right border
+        - top : (a, b, c): external boundary conditions at top border
+        - bottom : (a, b, c): external boundary conditions at bottom border
+    dx : float
+        lenght of each edge
+    f_tol : float
+        tolerance for the residue, passed on to the solver routine.  Default is
+        6e-6
+    force_positive : bool
+        make sure the solution is always non-negative - in a hacky way. Default
+        False
+    verbose : bool
+        print residue of the solution and its maximum and minimum values
 
     Returns
     -------
+    solution : 2-d array of the same shape of the landscape input 
+        the solution
 
-    solution : 2-d array of the same shape of the landscape input containing the solution
 
-    Boundary and interface conditions
-    ---------------------------------
+    .. rubric:: Boundary and interface conditions
 
     External boundaries are of the form
 
-    .. math::
-        a \\nabla u \cdot \hat{n} + b u + c = 0
+    .. math:: a \nabla u \cdot \hat{n} + b u + c = 0
 
     and may be different for left, right, top, bottom.  The derivative of u is
     taken along the normal to the boundary.
 
     The interfaces between patches and matrix are given by
-        
-    .. math::
-        u(x) &= \gamma v(x) \\\\
-        D_p \\nabla u(x) \cdot \hat{n} &= D_m \\nabla v(x) \cdot \hat{n}
-
-    where u is a patch and v is the solution in the matrix. These conditions
-    are handled using an assymetric finite difference scheme for the 2nd
-    derivative:
 
     .. math::
-        u_xx(x) = \\frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))
+        u(x) &= \gamma v(x) \\
+        D_p \nabla u(x) \cdot \hat{n} &= D_m \nabla v(x) \cdot \hat{n}
 
-    with the approximations at the interface:
+    where u is in a patch and v is the solution in the matrix. Usually the
+    discontinuity $\gamma$ is a result of different diffusivities and
+    preference at the border (see Ovaskainen and Cornell 2003). In that case,
+    given a preference $\alpha$ (between 0 and 1, exclusive) towards the patch,
+    this parameter should be:
+
+    .. math:: \gamma = \frac{D_m}{D_p} \frac{\alpha}{1-\alpha}
+
+    These conditions are handled using an asymetric finite difference scheme
+    for the 2nd derivative:
+
+    .. math:: u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))
+
+    At the interface, $u(x+h/2)$ and $v(x+h/2)$ must obey:
 
     .. math::
-        u(x+h/2) = \\frac{D_m v(x+h)+D_p u(x)}{(D_p+D_m g}
+        u(x+h/2) &= \gamma v(x+h/2) \\
+        D_p (u(x+h/2) - u(x))  &= D_m (v(x+h) - v(x+h/2))
+
+    Solving this system, we arrive at the approximation at the interface:
+
+    .. math:: u(x+h/2) = \frac{D_m v(x+h)+D_p u(x)}{D_p+D_m / \gamma}
 
     if u(x) is in a patch and v(x+h) is in the matrix, or
 
-    .. math::
-        v(x+h/2) = \\frac{g(D_m v(x)+D_p u(x+h))}{D_p+D_m g}
+    .. math:: v(x+h/2) = \frac{D_m v(x)+D_p u(x+h)}{D_p \gamma +D_m}
 
     if v(x) is in the matrix and u(x+h) is in a patch.
 
-    '''
+    """
     from scipy.optimize import newton_krylov
 
     (r, K, mu, Dp, Dm, g, (al, bl, cl), (ar, br, cr), (at, bt, ct), (ab, bb,
@@ -128,16 +142,18 @@ def solve_landscape(landscape, par, dx, f_tol=None, verbose=True):
     D = landscape * Dp + (1-landscape) * Dm
 
     Bxpm, Bxmp, Bypm, Bymp = find_interfaces(landscape)
-    factor_pp = -1. + 2. * Dp/(Dp+Dm*g)
-    factor_pm = -1. + 2. * Dm/(Dp+Dm*g)
-    factor_mp = -1. + 2. * g * Dp/(Dp+Dm*g)
-    factor_mm = -1. + 2. * g * Dm/(Dp+Dm*g)
+    factor_pp = -1. + 2. * Dp/(Dp+Dm/g)
+    factor_pm = -1. + 2. * Dm/(Dp+Dm/g)
+    factor_mp = -1. + 2. * Dp/(Dp*g+Dm)
+    factor_mm = -1. + 2. * Dm/(Dp*g+Dm)
 
     def residual(P):
-        d2x = zeros_like(P)
-        d2y = zeros_like(P)
+        if force_positive:
+            P = np.abs(P)
+        d2x = np.zeros_like(P)
+        d2y = np.zeros_like(P)
 
-        d2x[1:-1,:] = P[2:,:]   - 2*P[1:-1,:] + P[:-2,:]
+        d2x[1:-1,:] = P[2:,:] - 2*P[1:-1,:] + P[:-2,:]
         # external boundaries
         d2x[0,:] = P[1,:] - 2*P[0,:] + (-cl - al/dx * P[0,:])/(bl - al/dx)
         d2x[-1,:] = P[-2,:] - 2*P[-1,:] + (-cr + ar/dx * P[-1,:])/(br + ar/dx)
@@ -146,7 +162,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, verbose=True):
                 Bxmp * (P[:-1,:] * factor_mm + P[1:,:] * factor_mp)
         d2x[1:,:] += Bxpm * (P[:-1,:] * factor_mp + P[1:,:] * factor_mm) + \
                 Bxmp * (P[:-1,:] * factor_pm + P[1:,:] * factor_pp)
-        d2x[:-1,:] *= (Bxpm+Bxmp)*1./3. + Bxpm*Bxmp/3. + ones(Bxpm.shape)
+        d2x[:-1,:] *= (Bxpm+Bxmp)*1./3. + Bxpm*Bxmp/3. + np.ones(Bxpm.shape)
 
         d2y[:,1:-1] = P[:,2:] - 2*P[:,1:-1] + P[:,:-2]
         # external boundaries
@@ -157,13 +173,15 @@ def solve_landscape(landscape, par, dx, f_tol=None, verbose=True):
                 Bymp * (P[:,:-1] * factor_mm + P[:,1:] * factor_mp)
         d2y[:,1:] += Bypm * (P[:,:-1] * factor_mp + P[:,1:] * factor_mm) + \
                 Bymp * (P[:,:-1] * factor_pm + P[:,1:] * factor_pp)
-        d2y[:,:-1] *= (Bypm+Bymp)*1./3. + Bypm*Bymp/3. + ones(Bypm.shape)
+        d2y[:,:-1] *= (Bypm+Bymp)*1./3. + Bypm*Bymp/3. + np.ones(Bypm.shape)
 
         return D*(d2x + d2y)/dx/dx + lin_term*P + sec_term*P**2
 
     # solve
-    guess = K * ones_like(landscape)
+    guess = K * np.ones_like(landscape)
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
+    if force_positive:
+        sol = np.abs(sol)
     if verbose:
         print('Residual: %e' % abs(residual(sol)).max())
         print('max. pop.: %f' % sol.max())
@@ -188,38 +206,37 @@ def solve_multiple_parameters(variables, values, landscape, par, dx, f_tol=None,
     '''Solve given landscape for several combinations of parameters.
 
     Solves a given landscape with a set of common parameters and for a range of
-    values for some variables, optionally using multiprocessing to speed things
-    up.
+    values for some variables, optionally using multiprocessing to speed it up.
 
     Parameters
     ----------
-    variables : list of strings with the name of the varied parameters
-    values : list of lists (or tuples), where each item contains a list of
-        values corresponding to the parameters given in the `variables` list
-    landscape : 2-d array of zeroes and ones describing the landscape
-    par : common values for all the problem parameters. See documentation for
-        `solve_landscape()`
-    dx : lenght of each edge
-    f_tol : float, tolerance for the residue, passed on to the solver routine.
-        Default is 6e-6
-    verbose : print residue of the solution and its maximum and minimum values.
-        Notice that the order of appearance of each output is not the same as
-        the input if multiprocess is True.
-    multiprocess : determines whether to use multiprocessing to use multiple
-        cores. True by default, in which case the total number of CPUs minus
-        one are used
+    - variables: list of strings with the name of the varied parameters
+    - values: list of lists (or tuples), where each item contains a list of
+      values corresponding to the parameters given in the `variables` list
+    - landscape: 2-d array of zeroes and ones describing the landscape
+    - par: common values for all the problem parameters. See documentation for
+      solve_landscape()`
+    - dx: length of each edge
+    - f_tol: float, tolerance for the residue, passed on to the solver routine.
+      Default is 6e-6
+    - verbose: print residue of the solution and its maximum and minimum
+      values.  Notice that the order of appearance of each output is not the
+      same as the input if multiprocess is True.
+    - multiprocess: determines whether to use multiprocessing to use multiple
+      cores. True by default, in which case the total number of CPUs minus one
+      are used
 
     Returns
     -------
-    solutions : list containing the solutions to each set of parameters, in the
-        same ordering of the input values
+    - solutions: list containing the solutions to each set of parameters, in
+      the same ordering of the input values
 
     Example
     -------
     >>> from landscape import *
     >>> lA = image_to_landscape('landA.tif')
-    >>> D = arange(0.01, 0.05, 0.01)
-    >>> r = arange(0.1, 0.5, 0.1)
+    >>> D = np.arange(0.01, 0.05, 0.01)
+    >>> r = np.arange(0.1, 0.5, 0.1)
     >>> values = [ (x, y, y) for x, y in iproduct(r, D) ]
     >>> sols = solve_multiple_parameters(['r', 'Dp', 'Dm'], values, lA, par, dx)
 
@@ -300,7 +317,7 @@ def solve_multiple_landscapes(landscapes, par, dx, f_tol=None, verbose=True,
 
 def refine_grid(landscape, n=2):
     '''Increase the resolution of a landscape grid by a factor of n.'''
-    return repeat(repeat(landscape, n, axis=1), n, axis=0)
+    return np.repeat(np.repeat(landscape, n, axis=1), n, axis=0)
 
 def image_to_landscape(image):
     '''Converts an image (in any RGB format) to a 2d array of ones and zeroes.
@@ -322,7 +339,7 @@ def image_to_landscape(image):
 
     # maybe use flipud/fliplr here?
     M = imread(image).sum(axis=2)[::-1,:]
-    M = around(M/M.max())
+    M = np.around(M/M.max())
     return 1 - M.astype(int16)
 
 def random_landscape(cover, frag, size, radius=1, norm='taxicab'):
@@ -344,8 +361,8 @@ def random_landscape(cover, frag, size, radius=1, norm='taxicab'):
     -------
     landscape : a square 2-d array of zeroes and ones
 
-    Reference
-    ---------
+    References
+    ----------
     Lenore Fahrig, Relative Effects of Habitat Loss and Fragmentation on
     Population Extinction, The Journal of Wildlife Management, Vol. 61, No. 3
     (Jul., 1997), pp. 603-610
@@ -356,7 +373,7 @@ def random_landscape(cover, frag, size, radius=1, norm='taxicab'):
     if cover > size**2:
         raise ValueError('Cover (=%i) must be smaller than total area (=%i).' %
                 (cover, size**2)) 
-    M = zeros((size+2*radius, size+2*radius), dtype=int)
+    M = np.zeros((size+2*radius, size+2*radius), dtype=int)
     n = 0
 
     if norm.lower() == 'maximum':
@@ -424,7 +441,7 @@ def popcount_patches(landscape, solution):
     for i in range(0, len(count)):
         marked = where(labeled == i)
         pops.append(solution[marked].sum())
-    return array([count, pops])
+    return np.array([count, pops])
 
 def statistics_landscape(landscape, labels=False):
     '''Labels patches and sums total area in each one.
@@ -443,21 +460,22 @@ def statistics_landscape(landscape, labels=False):
         where the second element is the labeled 2-d array landscape
 
     '''
+    from scipy.ndimage import label
     labeled, npatches = label(landscape)
     count = []
     for i in range(0, npatches+1):
-        marked = where(labeled == i)
+        marked = np.where(labeled == i)
         area = len(marked[0])
         count.append(area)
 
     if labels:
-        return array(count), labeled
-    return array(count)
+        return np.array(count), labeled
+    return np.array(count)
 
 def fit_exponential(count):
     from scipy.stats import kstest
 
-    m = 1./mean(count)
+    m = 1./np.mean(count)
     exp_cdf = lambda x: m * exp(-m*x)
     return kstest(count, exp_cdf)
 
@@ -465,30 +483,32 @@ def plot_landscape(landscape, solution, dx=dx, K=1.):
     #from matplotlib.pyplot import imshow, colorbar, ylabel, xlabel, yticks, xticks, subplot, cm
     extent = (0, solution.shape[1]*dx, 0, solution.shape[0]*dx)
 
-    subplot(211)
-    imshow(landscape, cmap=cm.binary, origin='lower', interpolation='none', extent=extent)
-    ylabel('y (km)')
-    locs, labels = xticks()
-    xticks(locs, ['']*len(locs))
+    plt.subplot(211)
+    plt.imshow(landscape, cmap=plt.cm.binary, origin='lower',
+               interpolation='none', extent=extent)
+    plt.ylabel('y (km)')
+    locs, labels = plt.xticks()
+    plt.xticks(locs, ['']*len(locs))
 
-    subplot(212)
-    imshow(solution, cmap=cm.jet, origin='lower', interpolation='none', extent=extent, vmin=0, vmax = K)
-    xlabel('x (km)')
-    ylabel('y (km)')
-    
-    colorbar()
+    plt.subplot(212)
+    plt.imshow(solution, cmap=plt.cm.jet, origin='lower', interpolation='none',
+               extent=extent, vmin=0, vmax = K)
+    plt.xlabel('x (km)')
+    plt.ylabel('y (km)')
+
+    plt.colorbar()
 
 def plot_density_area(pops, labels, xlog=True, ylog=False):
     for y, label in zip(pops, labels):
-        plot(y[0][1:], y[1][1:]/y[0][1:], '.', label=label)
+        plt.plot(y[0][1:], y[1][1:]/y[0][1:], '.', label=label)
 
-    xlabel('area')
-    ylabel('avg. density')
+    plt.xlabel('area')
+    plt.ylabel('avg. density')
     if xlog and ylog:
-        loglog()
+        plt.loglog()
     elif xlog:
-        xscale('log')
+        plt.xscale('log')
     elif ylog:
-        yscale('log')
-    legend(loc='best', frameon=False)
+        plt.yscale('log')
+    plt.legend(loc='best', frameon=False)
 

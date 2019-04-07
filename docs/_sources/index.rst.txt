@@ -1,4 +1,4 @@
-Welcome to documentation on Landscape Solver!
+Welcome to documentation on EllipLand!
 =============================================
 
 .. autosummary::

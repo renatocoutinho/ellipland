@@ -22,7 +22,7 @@ doctest_path = [root]
 
 # -- Project information -----------------------------------------------------
 
-project = 'Landscape Solver'
+project = 'ellipland'
 copyright = '2019, Renato Coutinho'
 author = 'Renato Coutinho'
 
@@ -47,10 +47,14 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
+    'texext.math_dollar', # requires texext package
 ]
 
 autodoc_default_flags = ['members']
 autosummary_generate = True
+napoleon_google_docstring = False
+napoleon_use_rtype = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -112,7 +116,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'landscapedoc'
+htmlhelp_basename = 'elliplanddoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -139,7 +143,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'landscape.tex', 'landscape Documentation',
+    (master_doc, 'ellipland.tex', 'EllipLand Documentation',
      'Renato Coutinho', 'manual'),
 ]
 
@@ -149,7 +153,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'landscape', 'landscape Documentation',
+    (master_doc, 'ellipland', 'EllipLand Documentation',
      [author], 1)
 ]
 
@@ -160,8 +164,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'landscape', 'landscape Documentation',
-     author, 'landscape', 'One line description of project.',
+    (master_doc, 'ellipland', 'EllipLand Documentation',
+     author, 'ellipland', 'One line description of project.',
      'Miscellaneous'),
 ]
 
