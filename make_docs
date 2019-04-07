@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+mv docs html
+make html
+mv html docs
+
