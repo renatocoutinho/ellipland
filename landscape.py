@@ -201,8 +201,8 @@ def find_interfaces(landscape):
     Bymp = (-By + 1)//2
     return Bxpm, Bxmp, Bypm, Bymp
 
-def solve_multiple_parameters(variables, values, landscape, par, dx, f_tol=None, verbose=True,
-        multiprocess=True):
+def solve_multiple_parameters(variables, values, landscape, par, dx,
+        f_tol=None, force_positive=False, verbose=True, multiprocess=True):
     '''Solve given landscape for several combinations of parameters.
 
     Solves a given landscape with a set of common parameters and for a range of
@@ -210,26 +210,34 @@ def solve_multiple_parameters(variables, values, landscape, par, dx, f_tol=None,
 
     Parameters
     ----------
-    - variables: list of strings with the name of the varied parameters
-    - values: list of lists (or tuples), where each item contains a list of
-      values corresponding to the parameters given in the `variables` list
-    - landscape: 2-d array of zeroes and ones describing the landscape
-    - par: common values for all the problem parameters. See documentation for
-      solve_landscape()`
-    - dx: length of each edge
-    - f_tol: float, tolerance for the residue, passed on to the solver routine.
-      Default is 6e-6
-    - verbose: print residue of the solution and its maximum and minimum
-      values.  Notice that the order of appearance of each output is not the
-      same as the input if multiprocess is True.
-    - multiprocess: determines whether to use multiprocessing to use multiple
-      cores. True by default, in which case the total number of CPUs minus one
-      are used
+    variables : list of strings
+        names of the varied parameters
+    values : list of lists (or tuples)
+        each item contains a list of values corresponding to the parameters
+        given in the `variables` list
+    landscape : 2-d array
+        zeroes and ones describing the landscape
+    par : ordered dict
+        common values for all the problem parameters. See documentation for
+        `solve_landscape()`
+    dx: float
+        length of each edge
+    f_tol : float
+        tolerance for the residue, passed on to the solver routine. Default is
+        6e-6
+    verbose : bool
+        print residue of the solution and its maximum and minimum values.
+        Notice that the order of appearance of each output is not the same as
+        the input if multiprocess is True.
+    multiprocess : bool
+        determines whether to use multiprocessing to use multiple cores. True
+        by default, in which case the total number of CPUs minus one are used
 
     Returns
     -------
-    - solutions: list containing the solutions to each set of parameters, in
-      the same ordering of the input values
+    solutions: list of 2-d arrays
+        solutions of each set of parameters, in the same ordering of the input
+        values
 
     Example
     -------

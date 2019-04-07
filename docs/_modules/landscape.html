@@ -14,6 +14,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -236,8 +237,8 @@
     <span class="n">Bymp</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">By</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
     <span class="k">return</span> <span class="n">Bxpm</span><span class="p">,</span> <span class="n">Bxmp</span><span class="p">,</span> <span class="n">Bypm</span><span class="p">,</span> <span class="n">Bymp</span></div>
 
-<div class="viewcode-block" id="solve_multiple_parameters"><a class="viewcode-back" href="../stubs/landscape.html#landscape.solve_multiple_parameters">[docs]</a><span class="k">def</span> <span class="nf">solve_multiple_parameters</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">landscape</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">multiprocess</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="solve_multiple_parameters"><a class="viewcode-back" href="../stubs/landscape.html#landscape.solve_multiple_parameters">[docs]</a><span class="k">def</span> <span class="nf">solve_multiple_parameters</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">landscape</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span>
+        <span class="n">f_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiprocess</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Solve given landscape for several combinations of parameters.</span>
 
 <span class="sd">    Solves a given landscape with a set of common parameters and for a range of</span>
@@ -245,26 +246,34 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    - variables: list of strings with the name of the varied parameters</span>
-<span class="sd">    - values: list of lists (or tuples), where each item contains a list of</span>
-<span class="sd">      values corresponding to the parameters given in the `variables` list</span>
-<span class="sd">    - landscape: 2-d array of zeroes and ones describing the landscape</span>
-<span class="sd">    - par: common values for all the problem parameters. See documentation for</span>
-<span class="sd">      solve_landscape()`</span>
-<span class="sd">    - dx: length of each edge</span>
-<span class="sd">    - f_tol: float, tolerance for the residue, passed on to the solver routine.</span>
-<span class="sd">      Default is 6e-6</span>
-<span class="sd">    - verbose: print residue of the solution and its maximum and minimum</span>
-<span class="sd">      values.  Notice that the order of appearance of each output is not the</span>
-<span class="sd">      same as the input if multiprocess is True.</span>
-<span class="sd">    - multiprocess: determines whether to use multiprocessing to use multiple</span>
-<span class="sd">      cores. True by default, in which case the total number of CPUs minus one</span>
-<span class="sd">      are used</span>
+<span class="sd">    variables : list of strings</span>
+<span class="sd">        names of the varied parameters</span>
+<span class="sd">    values : list of lists (or tuples)</span>
+<span class="sd">        each item contains a list of values corresponding to the parameters</span>
+<span class="sd">        given in the `variables` list</span>
+<span class="sd">    landscape : 2-d array</span>
+<span class="sd">        zeroes and ones describing the landscape</span>
+<span class="sd">    par : ordered dict</span>
+<span class="sd">        common values for all the problem parameters. See documentation for</span>
+<span class="sd">        `solve_landscape()`</span>
+<span class="sd">    dx: float</span>
+<span class="sd">        length of each edge</span>
+<span class="sd">    f_tol : float</span>
+<span class="sd">        tolerance for the residue, passed on to the solver routine. Default is</span>
+<span class="sd">        6e-6</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        print residue of the solution and its maximum and minimum values.</span>
+<span class="sd">        Notice that the order of appearance of each output is not the same as</span>
+<span class="sd">        the input if multiprocess is True.</span>
+<span class="sd">    multiprocess : bool</span>
+<span class="sd">        determines whether to use multiprocessing to use multiple cores. True</span>
+<span class="sd">        by default, in which case the total number of CPUs minus one are used</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    - solutions: list containing the solutions to each set of parameters, in</span>
-<span class="sd">      the same ordering of the input values</span>
+<span class="sd">    solutions: list of 2-d arrays</span>
+<span class="sd">        solutions of each set of parameters, in the same ordering of the input</span>
+<span class="sd">        values</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>

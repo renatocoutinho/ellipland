@@ -14,6 +14,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -282,7 +283,7 @@ one are used</li>
 
 <dl class="function">
 <dt id="landscape.solve_multiple_parameters">
-<code class="descclassname">landscape.</code><code class="descname">solve_multiple_parameters</code><span class="sig-paren">(</span><em>variables</em>, <em>values</em>, <em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>verbose=True</em>, <em>multiprocess=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_multiple_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_multiple_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">landscape.</code><code class="descname">solve_multiple_parameters</code><span class="sig-paren">(</span><em>variables</em>, <em>values</em>, <em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>force_positive=False</em>, <em>verbose=True</em>, <em>multiprocess=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_multiple_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_multiple_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solve given landscape for several combinations of parameters.</p>
 <p>Solves a given landscape with a set of common parameters and for a range of
 values for some variables, optionally using multiprocessing to speed it up.</p>
@@ -291,20 +292,25 @@ values for some variables, optionally using multiprocessing to speed it up.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>variables</strong> (<em>-</em>) – </li>
-<li><strong>values</strong> (<em>-</em>) – values corresponding to the parameters given in the <cite>variables</cite> list</li>
-<li><strong>landscape</strong> (<em>-</em>) – </li>
-<li><strong>par</strong> (<em>-</em>) – solve_landscape()`</li>
-<li><strong>dx</strong> (<em>-</em>) – </li>
-<li><strong>f_tol</strong> (<em>-</em>) – Default is 6e-6</li>
-<li><strong>verbose</strong> (<em>-</em>) – values.  Notice that the order of appearance of each output is not the
-same as the input if multiprocess is True.</li>
-<li><strong>multiprocess</strong> (<em>-</em>) – cores. True by default, in which case the total number of CPUs minus one
-are used</li>
+<li><strong>variables</strong> (<em>list of strings</em>) – names of the varied parameters</li>
+<li><strong>values</strong> (<em>list of lists</em><em> (or </em><em>tuples</em><em>)</em>) – each item contains a list of values corresponding to the parameters
+given in the <cite>variables</cite> list</li>
+<li><strong>landscape</strong> (<em>2-d array</em>) – zeroes and ones describing the landscape</li>
+<li><strong>par</strong> (<em>ordered dict</em>) – common values for all the problem parameters. See documentation for
+<cite>solve_landscape()</cite></li>
+<li><strong>dx</strong> (<em>float</em>) – length of each edge</li>
+<li><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine. Default is
+6e-6</li>
+<li><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values.
+Notice that the order of appearance of each output is not the same as
+the input if multiprocess is True.</li>
+<li><strong>multiprocess</strong> (<em>bool</em>) – determines whether to use multiprocessing to use multiple cores. True
+by default, in which case the total number of CPUs minus one are used</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>- solutions</strong> (<em>list containing the solutions to each set of parameters, in</em>) – the same ordering of the input values</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>solutions</strong> (<em>list of 2-d arrays</em>) – solutions of each set of parameters, in the same ordering of the input
+values</p>
 </td>
 </tr>
 </tbody>
