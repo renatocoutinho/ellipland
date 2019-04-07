@@ -18,7 +18,6 @@ sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../'))
 root = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 #sys.path.insert(0, root)
-print(sys.path)
 doctest_path = [root]
 
 # -- Project information -----------------------------------------------------

@@ -79,26 +79,22 @@
 <span class="sd">    system of equations in 2 dimensions (x is a 2-d vector):</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">        u_{i_t}(x) &amp;= D_i \\nabla^2 u_i(x) + ru(1-u(x)/K) = 0 \\text{, in a patch} \\\\</span>
-<span class="sd">        v_t(x) &amp;= D_m \\nabla^2 v(x) - \mu v(x) = 0 \\text{, in the matrix}</span>
+<span class="sd">        u_{i_t}(x) &amp;= D_i \\nabla^2 u_i(x) + r_i u_i(1-u(x)/K_i) = 0</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    landscape : a 2-d array (of ints) describing the landscape, with 1 on</span>
-<span class="sd">        patches and 0 on matrix</span>
-<span class="sd">    par : a ordered dict containing parameters in the following order: </span>
-<span class="sd">        r: reproductive rate on patches</span>
-<span class="sd">        K: carrying capacity on patches</span>
-<span class="sd">        mu: mortality rate in the matrix</span>
-<span class="sd">        Dp: diffusivity on patches</span>
-<span class="sd">        Dm: diffusivity in the matrix</span>
+<span class="sd">    landscape : a 2-d array (of ints) describing the landscape, with numbers starting from 0 describing different types of habitat</span>
+<span class="sd">    par : a ordered dict containing parameters - for each type of habitat - in the following order: </span>
+<span class="sd">        r: growth rates (can be negative)</span>
+<span class="sd">        K: carrying capacities (can be np.Inf)</span>
+<span class="sd">        D: diffusivities</span>
 <span class="sd">        g: habitat preference parameter \gamma, usually less than one. See</span>
 <span class="sd">            interface conditions below</span>
 <span class="sd">        left: (a, b, c): external boundary conditions at left border</span>
 <span class="sd">        right: (a, b, c): external boundary conditions at right border</span>
 <span class="sd">        top: (a, b, c): external boundary conditions at top border</span>
 <span class="sd">        bottom: (a, b, c): external boundary conditions at bottom border</span>
-<span class="sd">    dx : lenght of each edge</span>
+<span class="sd">    dx : length of each edge</span>
 <span class="sd">    f_tol : float, tolerance for the residue, passed on to the solver routine.</span>
 <span class="sd">        Default is 6e-6</span>
 <span class="sd">    verbose : print residue of the solution and its maximum and minimum values</span>

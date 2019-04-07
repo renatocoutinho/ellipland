@@ -65,27 +65,22 @@
 stationary solution (or the solution to the elliptical problem) to the
 system of equations in 2 dimensions (x is a 2-d vector):</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}u_{i_t}(x) &amp;= D_i \nabla^2 u_i(x) + ru(1-u(x)/K) = 0 \text{, in a patch} \\
-v_t(x) &amp;= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{, in the matrix}\end{split}\]</div>
-<dl class="docutils">
-<dt>landscape <span class="classifier-delimiter">:</span> <span class="classifier">a 2-d array (of ints) describing the landscape, with 1 on</span></dt>
-<dd>patches and 0 on matrix</dd>
-<dt>par <span class="classifier-delimiter">:</span> <span class="classifier">a ordered dict containing parameters in the following order: </span></dt>
-<dd><p class="first">r: reproductive rate on patches
-K: carrying capacity on patches
-mu: mortality rate in the matrix
-Dp: diffusivity on patches
-Dm: diffusivity in the matrix
+\[u_{i_t}(x) &amp;= D_i \nabla^2 u_i(x) + r_i u_i(1-u(x)/K_i) = 0\]</div>
+<p>landscape : a 2-d array (of ints) describing the landscape, with numbers starting from 0 describing different types of habitat
+par : a ordered dict containing parameters - for each type of habitat - in the following order:</p>
+<blockquote>
+<div><p>r: growth rates (can be negative)
+K: carrying capacities (can be np.Inf)
+D: diffusivities
 g: habitat preference parameter gamma, usually less than one. See</p>
 <blockquote>
 <div>interface conditions below</div></blockquote>
-<p class="last">left: (a, b, c): external boundary conditions at left border
+<p>left: (a, b, c): external boundary conditions at left border
 right: (a, b, c): external boundary conditions at right border
 top: (a, b, c): external boundary conditions at top border
 bottom: (a, b, c): external boundary conditions at bottom border</p>
-</dd>
-</dl>
-<p>dx : lenght of each edge
+</div></blockquote>
+<p>dx : length of each edge
 f_tol : float, tolerance for the residue, passed on to the solver routine.</p>
 <blockquote>
 <div>Default is 6e-6</div></blockquote>

@@ -56,6 +56,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, verbose=True):
 
     Parameters
     ----------
+
     landscape : a 2-d array (of ints) describing the landscape, with 1 on
         patches and 0 on matrix
     par : a ordered dict containing parameters in the following order: 
@@ -77,11 +78,12 @@ def solve_landscape(landscape, par, dx, f_tol=None, verbose=True):
 
     Returns
     -------
-    solution : 2-d array of the same shape of the landscape input containing
-        the solution
+
+    solution : 2-d array of the same shape of the landscape input containing the solution
 
     Boundary and interface conditions
     ---------------------------------
+
     External boundaries are of the form
 
     .. math::
