@@ -216,6 +216,35 @@ def find_interfaces(landscape):
     Bymp = (-By + 1)//2
     return Bxpm, Bxmp, Bypm, Bymp
 
+def find_interfaces_ntypes(landscape):
+    '''Determines internal boundaries for landscapes with many habitat types.
+
+    Parameters
+    ----------
+    landscape : 2-d array
+
+    Returns
+    -------
+    Bx, By : tuple with two dicts
+        each key is a tuple (i,j) corresponding to the numbers of the habitat
+        types, and the value corresponds to the indices where a boundary
+        between them appears, along either the x or y direction
+
+    '''
+    n = np.unique(landscape).astype(int)
+    A = 2**(landscape.astype(int))
+    Ax = A[1:,:] - A[:-1,:]
+    Ay = A[:,1:] - A[:,:-1]
+    Bx = {}
+    By = {}
+    for i in n:
+        for j in n:
+            if i != j:
+                Bx[(i,j)] = np.where(Ax == 2**i - 2**j)
+                By[(i,j)] = np.where(Ay == 2**i - 2**j)
+
+    return Bx, By
+
 def solve_multiple_parameters(variables, values, landscape, par, dx,
         f_tol=None, force_positive=False, verbose=True, multiprocess=True):
     '''Solve given landscape for several combinations of parameters.
