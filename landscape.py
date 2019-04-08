@@ -178,6 +178,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
         d2x[1:,:] += Bxpm * (P[:-1,:] * factor_mp + P[1:,:] * factor_mm) + \
                 Bxmp * (P[:-1,:] * factor_pm + P[1:,:] * factor_pp)
         d2x[:-1,:] *= (Bxpm+Bxmp)*1./3. + Bxpm*Bxmp/3. + np.ones(Bxpm.shape)
+        # can Bxpm*Bxmp be non-zero??
 
         d2y[:,1:-1] = P[:,2:] - 2*P[:,1:-1] + P[:,:-2]
         # external boundaries
@@ -301,58 +302,70 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
 
     if v(x) is in the matrix and u(x+h) is in a patch.
 
+    Example
+    -------
+    >>> from landscape import *
+    >>> parn = OrderedDict([
+        ('r', [-0.03, 0.1]),
+        ('K', [inf, 1.0]),
+        ('D', [0.001, 0.0001]),
+        ('left', [1.0, 0.0, 0.0]),
+        ('right', [1.0, 0.0, 0.0]),
+        ('top', [1.0, 0.0, 0.0]),
+        ('bottom', [1.0, 0.0, 0.0])
+        ])
+    >>> l = np.zeros((100,100), dtype=int)
+    >>> l[40:60, 40:60] = 1
+    >>> sol = solve_landscape_ntypes(l, par, dx)
+
     """
     from scipy.optimize import newton_krylov
 
     n = np.unique(landscape).astype(int)
 
-    if 'g' not in par.keys():
-        par['g'] = {}
-        if 'alpha' not in par.keys():
-            par['alpha'] = {}
+    p = par.copy()
+    if 'g' not in p.keys():
+        p['g'] = {}
+        if 'alpha' not in p.keys():
+            p['alpha'] = {}
             for i, j in iproduct(n, repeat=2):
                 if i > j:
-                    par['alpha'][(i,j)] = 0.5
+                    p['alpha'][(i,j)] = 0.5
         for i, j in iproduct(n, repeat=2):
             if i > j:
-                par['g'][(i,j)] = par['D'][j]/par['D'][i] * \
-                                  par['alpha'][(i,j)] / (1-par['alpha'][(i,j)])
+                p['g'][(i,j)] = p['D'][j]/p['D'][i] * \
+                                  p['alpha'][(i,j)] / (1-p['alpha'][(i,j)])
 
     # this ensures the consistency of the interface discontinuities
     # it ignores the values of g_ij with i < j, replacing it by 1/g_ji
     for i, j in iproduct(n, repeat=2):
         if i < j:
-            par['g'][(i,j)] == 1/par['g'][(j,i)]
+            p['g'][(i,j)] = 1/p['g'][(j,i)]
 
-    (al, bl, cl) = par['left']
-    (ar, br, cr) = par['right']
-    (at, bt, ct) = par['top']
-    (ab, bb, cb) = par['bottom']
+    (al, bl, cl) = p['left']
+    (ar, br, cr) = p['right']
+    (at, bt, ct) = p['top']
+    (ab, bb, cb) = p['bottom']
 
     D = np.zeros_like(landscape)
     r = np.zeros_like(landscape)
     c = np.zeros_like(landscape)
     for i in n:
         li = np.where(landscape == i)
-        D[li] = par['D'][i]
-        r[li] = par['r'][i]
-        c[li] = - par['r'][i] / par['K'][i]
+        D[li] = p['D'][i]
+        r[li] = p['r'][i]
+        c[li] = - p['r'][i] / p['K'][i]
 
-    Bx, By = find_interfaces(landscape)
+    Bx, By = find_interfaces_ntypes(landscape)
     factor = {}
     for i, j in iproduct(n, repeat=2):
         if i > j:
             factor[(i,j)] = (
-                -1. + 2. * par['D'][i]/(par['D'][i]+par['D'][j]/par['g'][(i,j)]),
-                -1. + 2. * par['D'][j]/(par['D'][i]+par['D'][j]/par['g'][(i,j)])
-                -1. + 2. * par['D'][i]/(par['D'][i]*par['g'][(i,j)]+par['D'][j])
-                -1. + 2. * par['D'][j]/(par['D'][i]*par['g'][(i,j)]+par['D'][j])
+                -1. + 2. * p['D'][i]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
+                -1. + 2. * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
+                -1. + 2. * p['D'][i]/(p['D'][i]*p['g'][(i,j)]+p['D'][j]),
+                -1. + 2. * p['D'][j]/(p['D'][i]*p['g'][(i,j)]+p['D'][j])
                 )
-
-    factor_pp = -1. + 2. * par['Dp']/(par['Dp']+par['Dm']/par['g'])
-    factor_pm = -1. + 2. * par['Dm']/(par['Dp']+par['Dm']/par['g'])
-    factor_mp = -1. + 2. * par['Dp']/(par['Dp']*par['g']+par['Dm'])
-    factor_mm = -1. + 2. * par['Dm']/(par['Dp']*par['g']+par['Dm'])
 
     def residual(P):
         if force_positive:
@@ -367,11 +380,16 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         # interface conditions
         for (i,j), fac in factor.items():
             d2x[:-1,:][Bx[(i,j)]] += (P[:-1,:] * factor[(i,j)][0] + \
-                    P[1:,:] * factor[(i,j)][1]) [Bx[(i,j)]]
-            d2x[:-1,:][Bx[(j,i)]] += Bxmp * (P[:-1,:] * factor_mm + P[1:,:] * factor_mp)
-            d2x[1:,:][Bx[(i,j)]] += Bxpm * (P[:-1,:] * factor_mp + P[1:,:] * factor_mm) + \
-                    Bxmp * (P[:-1,:] * factor_pm + P[1:,:] * factor_pp)
-            d2x[:-1,:] *= (Bxpm+Bxmp)*1./3. + Bxpm*Bxmp/3. + np.ones(Bxpm.shape)
+                    P[1:,:] * factor[(i,j)][1])[Bx[(i,j)]]
+            d2x[:-1,:][Bx[(j,i)]] += (P[:-1,:] * factor[(i,j)][3] + \
+                    P[1:,:] * factor[(i,j)][2])[Bx[(j,i)]]
+            d2x[1:,:][Bx[(i,j)]] += (P[:-1,:] * factor[(i,j)][2] + \
+                    P[1:,:] * factor[(i,j)][3])[Bx[(i,j)]]
+            d2x[1:,:][Bx[(j,i)]] += (P[:-1,:] * factor[(i,j)][1] + \
+                    P[1:,:] * factor[(i,j)][0])[Bx[(j,i)]]
+            d2x[:-1,:][Bx[(i,j)]] *= 4/3 
+            d2x[:-1,:][Bx[(j,i)]] *= 4/3 
+            # assuming Bxpm*Bxmp is always zero (how could it not be??)
 
         d2y[:,1:-1] = P[:,2:] - 2*P[:,1:-1] + P[:,:-2]
         # external boundaries
@@ -379,16 +397,23 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         d2y[:,-1] = P[:,-2] - 2*P[:,-1] + (-ct + at/dx * P[:,-1])/(bt + at/dx)
         # interface conditions
         for (i,j), fac in factor.items():
-            d2y[:,:-1] += Bypm * (P[:,:-1] * factor_pp + P[:,1:] * factor_pm) + \
-                    Bymp * (P[:,:-1] * factor_mm + P[:,1:] * factor_mp)
-            d2y[:,1:] += Bypm * (P[:,:-1] * factor_mp + P[:,1:] * factor_mm) + \
-                    Bymp * (P[:,:-1] * factor_pm + P[:,1:] * factor_pp)
-            d2y[:,:-1] *= (Bypm+Bymp)*1./3. + Bypm*Bymp/3. + np.ones(Bypm.shape)
+            d2y[:-1,:][By[(i,j)]] += (P[:-1,:] * factor[(i,j)][0] + \
+                    P[1:,:] * factor[(i,j)][1])[By[(i,j)]]
+            d2y[:-1,:][By[(j,i)]] += (P[:-1,:] * factor[(i,j)][3] + \
+                    P[1:,:] * factor[(i,j)][2])[By[(j,i)]]
+            d2y[1:,:][By[(i,j)]] += (P[:-1,:] * factor[(i,j)][2] + \
+                    P[1:,:] * factor[(i,j)][3])[By[(i,j)]]
+            d2y[1:,:][By[(j,i)]] += (P[:-1,:] * factor[(i,j)][1] + \
+                    P[1:,:] * factor[(i,j)][0])[By[(j,i)]]
+            d2y[:-1,:][By[(i,j)]] *= 4/3 
+            d2y[:-1,:][By[(j,i)]] *= 4/3 
 
         return D*(d2x + d2y)/dx/dx + r*P + c*P**2
 
     # solve
-    guess = par['K'] * np.ones_like(landscape)
+    guess = r.copy()
+    guess[guess<=0] = 0
+    guess[guess>0] = 1/((-c/r)[guess>0])
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
     if force_positive:
         sol = np.abs(sol)
