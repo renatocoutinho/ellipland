@@ -46,32 +46,38 @@
 <tr class="row-odd"><td><a class="reference internal" href="#landscape.find_interfaces" title="landscape.find_interfaces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_interfaces</span></code></a>(landscape)</td>
 <td>Helper function that marks where are the internal boundaries.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_exponential</span></code>(count)</td>
+<tr class="row-even"><td><a class="reference internal" href="#landscape.find_interfaces_ntypes" title="landscape.find_interfaces_ntypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_interfaces_ntypes</span></code></a>(landscape)</td>
+<td>Determines internal boundaries for landscapes with many habitat types.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_exponential</span></code>(count)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#landscape.image_to_landscape" title="landscape.image_to_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_to_landscape</span></code></a>(image)</td>
+<tr class="row-even"><td><a class="reference internal" href="#landscape.image_to_landscape" title="landscape.image_to_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_to_landscape</span></code></a>(image)</td>
 <td>Converts an image (in any RGB format) to a 2d array of ones and zeroes.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_density_area</span></code>(pops,&nbsp;labels[,&nbsp;xlog,&nbsp;ylog])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_density_area</span></code>(pops,&nbsp;labels[,&nbsp;xlog,&nbsp;ylog])</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_landscape</span></code>(landscape,&nbsp;solution[,&nbsp;dx,&nbsp;K])</td>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_landscape</span></code>(landscape,&nbsp;solution[,&nbsp;dx,&nbsp;K])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#landscape.popcount_patches" title="landscape.popcount_patches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popcount_patches</span></code></a>(landscape,&nbsp;solution)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#landscape.popcount_patches" title="landscape.popcount_patches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popcount_patches</span></code></a>(landscape,&nbsp;solution)</td>
 <td>Labels patches and sums total area and population in each one.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#landscape.random_landscape" title="landscape.random_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_landscape</span></code></a>(cover,&nbsp;frag,&nbsp;size[,&nbsp;…])</td>
+<tr class="row-even"><td><a class="reference internal" href="#landscape.random_landscape" title="landscape.random_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_landscape</span></code></a>(cover,&nbsp;frag,&nbsp;size[,&nbsp;…])</td>
 <td>Generates random square landscapes with a given cover and fragmentation.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_landscape_inv</span></code>(cover,&nbsp;frag,&nbsp;size[,&nbsp;…])</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_landscape_inv</span></code>(cover,&nbsp;frag,&nbsp;size[,&nbsp;…])</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#landscape.refine_grid" title="landscape.refine_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_grid</span></code></a>(landscape[,&nbsp;n])</td>
+<tr class="row-even"><td><a class="reference internal" href="#landscape.refine_grid" title="landscape.refine_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_grid</span></code></a>(landscape[,&nbsp;n])</td>
 <td>Increase the resolution of a landscape grid by a factor of n.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#landscape.solve_landscape" title="landscape.solve_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_landscape</span></code></a>(landscape,&nbsp;par,&nbsp;dx[,&nbsp;f_tol,&nbsp;…])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#landscape.solve_landscape" title="landscape.solve_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_landscape</span></code></a>(landscape,&nbsp;par,&nbsp;dx[,&nbsp;f_tol,&nbsp;…])</td>
 <td>Find the stationary solution for a given landscape and set of parameters.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#landscape.solve_landscape_ntypes" title="landscape.solve_landscape_ntypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_landscape_ntypes</span></code></a>(landscape,&nbsp;par,&nbsp;dx[,&nbsp;…])</td>
+<td>Find the stationary solution for a landscape with many types of habitat.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="#landscape.solve_multiple_landscapes" title="landscape.solve_multiple_landscapes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_multiple_landscapes</span></code></a>(landscapes,&nbsp;par,&nbsp;dx)</td>
 <td>Solve several landscapes.</td>
@@ -270,12 +276,13 @@ D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))\end{split}\]</div>
 <dl class="function">
 <dt id="landscape.solve_landscape_ntypes">
 <code class="descclassname">landscape.</code><code class="descname">solve_landscape_ntypes</code><span class="sig-paren">(</span><em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>force_positive=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_landscape_ntypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_landscape_ntypes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find the stationary solution for a given landscape and set of parameters.</p>
+<dd><p>Find the stationary solution for a landscape with many types of habitat.</p>
 <p>Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
 stationary solution (or the solution to the elliptical problem) to the
 system of equations in 2 dimensions (x is a 2-d vector):</p>
 <div class="math notranslate nohighlight">
-\[u_{i_t}(x) &amp;= D_i \nabla^2 u_i(x) + r_i u_i(1-u(x)/K_i) = 0\]</div>
+\[\frac{\partial u_i}{\partial t} = D_i \nabla^2 u_i +
+r_i u_i\left(1-\frac{u}{K_i}\right) = 0\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -330,15 +337,15 @@ diffusivities and preference at the border (see Ovaskainen and Cornell
 exclusive) towards <span class="math notranslate nohighlight">\(i\)</span>, this parameter should be:</p>
 <div class="math notranslate nohighlight">
 \[\gamma_{ij} = \frac{D_j}{D_i} \frac{\alpha_{ij}}{1-\alpha_{ij}}\]</div>
-<p>This last condition is used in case <span class="math notranslate nohighlight">\(\gamma\)</span> is not set. If <span class="math notranslate nohighlight">\(\alpha isn't
-set either, it's assumed \)</span>. Notice that <cite>alpha_{ij} +
-alpha_{ji} = 1:math:</cite>. To ensure this condition, the key (i,j) is always taken
-with <cite>i&gt;j:math:</cite>.</p>
+<p>This last condition is used in case <span class="math notranslate nohighlight">\(\gamma\)</span> is not set. If <span class="math notranslate nohighlight">\(\alpha\)</span> isn’t
+set either, it’s assumed <span class="math notranslate nohighlight">\(\alpha = 1/2\)</span>. Notice that <span class="math notranslate nohighlight">\(\alpha_{ij} +
+\alpha_{ji} = 1\)</span>, and so <span class="math notranslate nohighlight">\(\gamma_{ij} = \gamma_{ji}^{-1}\)</span>. To ensure this
+condition, the key (i,j) is always taken with <span class="math notranslate nohighlight">\(i&gt;j\)</span>.</p>
 <p>These conditions are handled using an asymetric finite difference scheme
 for the 2nd derivative:</p>
 <div class="math notranslate nohighlight">
 \[u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))\]</div>
-<p>At the interface, <cite>u(x+h/2):math:</cite> and <a href="#id3"><span class="problematic" id="id4">`</span></a>v(x+h/2)$ must obey:</p>
+<p>At the interface, <span class="math notranslate nohighlight">\(u(x+h/2)\)</span> and <span class="math notranslate nohighlight">\(v(x+h/2)\)</span> must obey:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}u(x+h/2) &amp;= \gamma v(x+h/2) \\
 D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))\end{split}\]</div>
@@ -349,6 +356,23 @@ D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))\end{split}\]</div>
 <div class="math notranslate nohighlight">
 \[v(x+h/2) = \frac{D_m v(x)+D_p u(x+h)}{D_p \gamma +D_m}\]</div>
 <p>if v(x) is in the matrix and u(x+h) is in a patch.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># simple patch/matrix</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parn</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+<span class="go">    (&#39;r&#39;, [-0.03, 0.1]),</span>
+<span class="go">    (&#39;K&#39;, [np.Inf, 1.0]),</span>
+<span class="go">    (&#39;D&#39;, [0.001, 0.0001]),</span>
+<span class="go">    (&#39;left&#39;, [1.0, 0.0, 0.0]),</span>
+<span class="go">    (&#39;right&#39;, [1.0, 0.0, 0.0]),</span>
+<span class="go">    (&#39;top&#39;, [1.0, 0.0, 0.0]),</span>
+<span class="go">    (&#39;bottom&#39;, [1.0, 0.0, 0.0])</span>
+<span class="go">    ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">60</span><span class="p">,</span> <span class="mi">40</span><span class="p">:</span><span class="mi">60</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">solve_landscape_ntypes</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">parn</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">

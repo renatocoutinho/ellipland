@@ -208,13 +208,15 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
 
 def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         force_positive=False, verbose=True):
-    r"""Find the stationary solution for a given landscape and set of parameters.
+    r"""Find the stationary solution for a landscape with many types of habitat.
 
     Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
     stationary solution (or the solution to the elliptical problem) to the
     system of equations in 2 dimensions (x is a 2-d vector):
 
-    .. math:: u_{i_t}(x) &= D_i \nabla^2 u_i(x) + r_i u_i(1-u(x)/K_i) = 0
+    .. math:: 
+        \frac{\partial u_i}{\partial t} = D_i \nabla^2 u_i + 
+        r_i u_i\left(1-\frac{u}{K_i}\right) = 0
 
     Parameters
     ----------
@@ -276,10 +278,10 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
 
     .. math:: \gamma_{ij} = \frac{D_j}{D_i} \frac{\alpha_{ij}}{1-\alpha_{ij}}
 
-    This last condition is used in case $\gamma$ is not set. If $\alpha isn't
+    This last condition is used in case $\gamma$ is not set. If $\alpha$ isn't
     set either, it's assumed $\alpha = 1/2$. Notice that $\alpha_{ij} +
-    \alpha_{ji} = 1$. To ensure this condition, the key (i,j) is always taken
-    with $i>j$.
+    \alpha_{ji} = 1$, and so $\gamma_{ij} = \gamma_{ji}^{-1}$. To ensure this
+    condition, the key (i,j) is always taken with $i>j$.
 
     These conditions are handled using an asymetric finite difference scheme
     for the 2nd derivative:
