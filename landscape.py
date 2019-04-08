@@ -366,10 +366,10 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         d2x[-1,:] = P[-2,:] - 2*P[-1,:] + (-cr + ar/dx * P[-1,:])/(br + ar/dx)
         # interface conditions
         for (i,j), fac in factor.items():
-            d2x[:-1,:][Bx[(i,j)] += (P[:-1,:] * factor[(i,j)][0] + \
+            d2x[:-1,:][Bx[(i,j)]] += (P[:-1,:] * factor[(i,j)][0] + \
                     P[1:,:] * factor[(i,j)][1]) [Bx[(i,j)]]
-            d2x[:-1,:][Bx[(j,i)] += Bxmp * (P[:-1,:] * factor_mm + P[1:,:] * factor_mp)
-            d2x[1:,:][Bx[(i,j)] += Bxpm * (P[:-1,:] * factor_mp + P[1:,:] * factor_mm) + \
+            d2x[:-1,:][Bx[(j,i)]] += Bxmp * (P[:-1,:] * factor_mm + P[1:,:] * factor_mp)
+            d2x[1:,:][Bx[(i,j)]] += Bxpm * (P[:-1,:] * factor_mp + P[1:,:] * factor_mm) + \
                     Bxmp * (P[:-1,:] * factor_pm + P[1:,:] * factor_pp)
             d2x[:-1,:] *= (Bxpm+Bxmp)*1./3. + Bxpm*Bxmp/3. + np.ones(Bxpm.shape)
 
