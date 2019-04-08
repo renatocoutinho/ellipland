@@ -381,6 +381,7 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         d2x[0,:] = P[1,:] - 2*P[0,:] + (-cl - al/dx * P[0,:])/(bl - al/dx)
         d2x[-1,:] = P[-2,:] - 2*P[-1,:] + (-cr + ar/dx * P[-1,:])/(br + ar/dx)
         # interface conditions
+        # TODO: probably something wrong here
         for (i,j), fac in factor.items():
             d2x[:-1,:][Bx[(i,j)]] += (P[:-1,:] * factor[(i,j)][0] + \
                     P[1:,:] * factor[(i,j)][1])[Bx[(i,j)]]
