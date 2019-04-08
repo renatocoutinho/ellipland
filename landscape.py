@@ -204,6 +204,202 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
 
     return sol
 
+
+def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
+        force_positive=False, verbose=True):
+    r"""Find the stationary solution for a given landscape and set of parameters.
+
+    Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
+    stationary solution (or the solution to the elliptical problem) to the
+    system of equations in 2 dimensions (x is a 2-d vector):
+
+    .. math:: u_{i_t}(x) &= D_i \nabla^2 u_i(x) + r_i u_i(1-u(x)/K_i) = 0
+
+    Parameters
+    ----------
+    landscape : 2-d array of ints
+        describe the landscape, with any number of habitat types
+    par : dict
+        parameters (dict keys):
+
+        - r : growth rates (can be negative)
+        - K : carrying capacities (cn be np.Inf)
+        - mu : mortality rate in the matrix
+        - D : diffusivities
+        - g : dict of habitat discontinuities $\gamma_{ij}$ - see interface
+          conditions below. The keys are tuples (i,j) of the habitat
+          types indices (optional)
+        - alpha : dict of habitat preferences, only taken into account if g is
+          not present. In that case, $\gamma_{ij}$ is calculated as
+          $\gamma_{ij} = D_j \alpha_{ij} / (D_i*(1-\alpha_{ij}))$ (optional)
+        - left : (a, b, c): external boundary conditions at left border
+        - right : (a, b, c): external boundary conditions at right border
+        - top : (a, b, c): external boundary conditions at top border
+        - bottom : (a, b, c): external boundary conditions at bottom border
+    dx : float
+        lenght of each edge
+    f_tol : float
+        tolerance for the residue, passed on to the solver routine.  Default is
+        6e-6
+    force_positive : bool
+        make sure the solution is always non-negative - in a hacky way. Default
+        False
+    verbose : bool
+        print residue of the solution and its maximum and minimum values
+
+    Returns
+    -------
+    solution : 2-d array of the same shape of the landscape input 
+        the solution
+
+
+    .. rubric:: Boundary and interface conditions
+
+    External boundaries are of the form
+
+    .. math:: a \nabla u \cdot \hat{n} + b u + c = 0
+
+    and may be different for left, right, top, bottom.  The derivative of u is
+    taken along the normal to the boundary.
+
+    The interfaces between patches and matrix are given by
+
+    .. math::
+        u_i(x) &= \gamma_{ij} u_j(x) \\
+        D_i \nabla u_i(x) \cdot \hat{n} &= D_j \nabla u_j(x) \cdot \hat{n}
+
+    Usually the discontinuity $\gamma_{ij}$ is a result of different
+    diffusivities and preference at the border (see Ovaskainen and Cornell
+    2003). In that case, given a preference $\alpha_{ij}$ (between 0 and 1,
+    exclusive) towards $i$, this parameter should be:
+
+    .. math:: \gamma_{ij} = \frac{D_j}{D_i} \frac{\alpha_{ij}}{1-\alpha_{ij}}
+
+    This last condition is used in case $\gamma$ is not set. If $\alpha isn't
+    set either, it's assumed $\alpha = 1/2$. Notice that $\alpha_{ij} +
+    \alpha_{ji} = 1$. To ensure this condition, the key (i,j) is always taken
+    with $i>j$.
+
+    These conditions are handled using an asymetric finite difference scheme
+    for the 2nd derivative:
+
+    .. math:: u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))
+
+    At the interface, $u(x+h/2)$ and $v(x+h/2)$ must obey:
+
+    .. math::
+        u(x+h/2) &= \gamma v(x+h/2) \\
+        D_p (u(x+h/2) - u(x))  &= D_m (v(x+h) - v(x+h/2))
+
+    Solving this system, we arrive at the approximation at the interface:
+
+    .. math:: u(x+h/2) = \frac{D_m v(x+h)+D_p u(x)}{D_p+D_m / \gamma}
+
+    if u(x) is in a patch and v(x+h) is in the matrix, or
+
+    .. math:: v(x+h/2) = \frac{D_m v(x)+D_p u(x+h)}{D_p \gamma +D_m}
+
+    if v(x) is in the matrix and u(x+h) is in a patch.
+
+    """
+    from scipy.optimize import newton_krylov
+
+    n = np.unique(landscape).astype(int)
+
+    if 'g' not in par.keys():
+        par['g'] = {}
+        if 'alpha' not in par.keys():
+            par['alpha'] = {}
+            for i, j in iproduct(n, repeat=2):
+                if i > j:
+                    par['alpha'][(i,j)] = 0.5
+        for i, j in iproduct(n, repeat=2):
+            if i > j:
+                par['g'][(i,j)] = par['D'][j]/par['D'][i] * \
+                                  par['alpha'][(i,j)] / (1-par['alpha'][(i,j)])
+
+    # this ensures the consistency of the interface discontinuities
+    # it ignores the values of g_ij with i < j, replacing it by 1/g_ji
+    for i, j in iproduct(n, repeat=2):
+        if i < j:
+            par['g'][(i,j)] == 1/par['g'][(j,i)]
+
+    (al, bl, cl) = par['left']
+    (ar, br, cr) = par['right']
+    (at, bt, ct) = par['top']
+    (ab, bb, cb) = par['bottom']
+
+    D = np.zeros_like(landscape)
+    r = np.zeros_like(landscape)
+    c = np.zeros_like(landscape)
+    for i in n:
+        li = np.where(landscape == i)
+        D[li] = par['D'][i]
+        r[li] = par['r'][i]
+        c[li] = - par['r'][i] / par['K'][i]
+
+    Bx, By = find_interfaces(landscape)
+    factor = {}
+    for i, j in iproduct(n, repeat=2):
+        if i > j:
+            factor[(i,j)] = (
+                -1. + 2. * par['D'][i]/(par['D'][i]+par['D'][j]/par['g'][(i,j)]),
+                -1. + 2. * par['D'][j]/(par['D'][i]+par['D'][j]/par['g'][(i,j)])
+                -1. + 2. * par['D'][i]/(par['D'][i]*par['g'][(i,j)]+par['D'][j])
+                -1. + 2. * par['D'][j]/(par['D'][i]*par['g'][(i,j)]+par['D'][j])
+                )
+
+    factor_pp = -1. + 2. * par['Dp']/(par['Dp']+par['Dm']/par['g'])
+    factor_pm = -1. + 2. * par['Dm']/(par['Dp']+par['Dm']/par['g'])
+    factor_mp = -1. + 2. * par['Dp']/(par['Dp']*par['g']+par['Dm'])
+    factor_mm = -1. + 2. * par['Dm']/(par['Dp']*par['g']+par['Dm'])
+
+    def residual(P):
+        if force_positive:
+            P = np.abs(P)
+        d2x = np.zeros_like(P)
+        d2y = np.zeros_like(P)
+
+        d2x[1:-1,:] = P[2:,:] - 2*P[1:-1,:] + P[:-2,:]
+        # external boundaries
+        d2x[0,:] = P[1,:] - 2*P[0,:] + (-cl - al/dx * P[0,:])/(bl - al/dx)
+        d2x[-1,:] = P[-2,:] - 2*P[-1,:] + (-cr + ar/dx * P[-1,:])/(br + ar/dx)
+        # interface conditions
+        for (i,j), fac in factor.items():
+            d2x[:-1,:][Bx[(i,j)] += (P[:-1,:] * factor[(i,j)][0] + \
+                    P[1:,:] * factor[(i,j)][1]) [Bx[(i,j)]]
+            d2x[:-1,:][Bx[(j,i)] += Bxmp * (P[:-1,:] * factor_mm + P[1:,:] * factor_mp)
+            d2x[1:,:][Bx[(i,j)] += Bxpm * (P[:-1,:] * factor_mp + P[1:,:] * factor_mm) + \
+                    Bxmp * (P[:-1,:] * factor_pm + P[1:,:] * factor_pp)
+            d2x[:-1,:] *= (Bxpm+Bxmp)*1./3. + Bxpm*Bxmp/3. + np.ones(Bxpm.shape)
+
+        d2y[:,1:-1] = P[:,2:] - 2*P[:,1:-1] + P[:,:-2]
+        # external boundaries
+        d2y[:,0] = P[:,1] - 2*P[:,0] + (-cb - ab/dx * P[:,0])/(bb - ab/dx)
+        d2y[:,-1] = P[:,-2] - 2*P[:,-1] + (-ct + at/dx * P[:,-1])/(bt + at/dx)
+        # interface conditions
+        for (i,j), fac in factor.items():
+            d2y[:,:-1] += Bypm * (P[:,:-1] * factor_pp + P[:,1:] * factor_pm) + \
+                    Bymp * (P[:,:-1] * factor_mm + P[:,1:] * factor_mp)
+            d2y[:,1:] += Bypm * (P[:,:-1] * factor_mp + P[:,1:] * factor_mm) + \
+                    Bymp * (P[:,:-1] * factor_pm + P[:,1:] * factor_pp)
+            d2y[:,:-1] *= (Bypm+Bymp)*1./3. + Bypm*Bymp/3. + np.ones(Bypm.shape)
+
+        return D*(d2x + d2y)/dx/dx + r*P + c*P**2
+
+    # solve
+    guess = par['K'] * np.ones_like(landscape)
+    sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
+    if force_positive:
+        sol = np.abs(sol)
+    if verbose:
+        print('Residual: %e' % abs(residual(sol)).max())
+        print('max. pop.: %f' % sol.max())
+        print('min. pop.: %f' % sol.min())
+
+    return sol
+
+
 def find_interfaces(landscape):
     '''Helper function that marks where are the internal boundaries.'''
     B = 2*landscape - 1
@@ -225,7 +421,7 @@ def find_interfaces_ntypes(landscape):
 
     Returns
     -------
-    Bx, By : tuple with two dicts
+    Bx, By : tuple of two dicts
         each key is a tuple (i,j) corresponding to the numbers of the habitat
         types, and the value corresponds to the indices where a boundary
         between them appears, along either the x or y direction
@@ -237,11 +433,10 @@ def find_interfaces_ntypes(landscape):
     Ay = A[:,1:] - A[:,:-1]
     Bx = {}
     By = {}
-    for i in n:
-        for j in n:
-            if i != j:
-                Bx[(i,j)] = np.where(Ax == 2**i - 2**j)
-                By[(i,j)] = np.where(Ay == 2**i - 2**j)
+    for i, j in iproduct(n, repeat=2):
+        if i != j:
+            Bx[(i,j)] = np.where(Ax == 2**i - 2**j)
+            By[(i,j)] = np.where(Ay == 2**i - 2**j)
 
     return Bx, By
 

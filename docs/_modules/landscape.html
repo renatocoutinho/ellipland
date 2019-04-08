@@ -93,8 +93,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    landscape : 2-d array of ints</span>
 <span class="sd">        describe the landscape, with 1 on patches and 0 on matrix</span>
-<span class="sd">    par : ordered dict</span>
-<span class="sd">        parameters in the following order: </span>
+<span class="sd">    par : dict</span>
+<span class="sd">        parameters (dict keys): </span>
 
 <span class="sd">        - r : reproductive rate on patches</span>
 <span class="sd">        - K : carrying capacity on patches</span>
@@ -240,6 +240,186 @@
 
     <span class="k">return</span> <span class="n">sol</span></div>
 
+
+<div class="viewcode-block" id="solve_landscape_ntypes"><a class="viewcode-back" href="../stubs/landscape.html#landscape.solve_landscape_ntypes">[docs]</a><span class="k">def</span> <span class="nf">solve_landscape_ntypes</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">force_positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Find the stationary solution for a given landscape and set of parameters.</span>
+
+<span class="sd">    Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a</span>
+<span class="sd">    stationary solution (or the solution to the elliptical problem) to the</span>
+<span class="sd">    system of equations in 2 dimensions (x is a 2-d vector):</span>
+
+<span class="sd">    .. math:: u_{i_t}(x) &amp;= D_i \nabla^2 u_i(x) + r_i u_i(1-u(x)/K_i) = 0</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    landscape : 2-d array of ints</span>
+<span class="sd">        describe the landscape, with any number of habitat types</span>
+<span class="sd">    par : dict</span>
+<span class="sd">        parameters (dict keys):</span>
+
+<span class="sd">        - r : growth rates (can be negative)</span>
+<span class="sd">        - K : carrying capacities (cn be np.Inf)</span>
+<span class="sd">        - mu : mortality rate in the matrix</span>
+<span class="sd">        - D : diffusivities</span>
+<span class="sd">        - g : dict of habitat discontinuities $\gamma_{ij}$ - see interface</span>
+<span class="sd">          conditions below. The keys are tuples (i,j) of the habitat</span>
+<span class="sd">          types indices (optional)</span>
+<span class="sd">        - alpha : dict of habitat preferences, only taken into account if g is</span>
+<span class="sd">          not present. In that case, $\gamma_{ij}$ is calculated as</span>
+<span class="sd">          $\gamma_{ij} = D_j \alpha_{ij} / (D_i*(1-\alpha_{ij}))$ (optional)</span>
+<span class="sd">        - left : (a, b, c): external boundary conditions at left border</span>
+<span class="sd">        - right : (a, b, c): external boundary conditions at right border</span>
+<span class="sd">        - top : (a, b, c): external boundary conditions at top border</span>
+<span class="sd">        - bottom : (a, b, c): external boundary conditions at bottom border</span>
+<span class="sd">    dx : float</span>
+<span class="sd">        lenght of each edge</span>
+<span class="sd">    f_tol : float</span>
+<span class="sd">        tolerance for the residue, passed on to the solver routine.  Default is</span>
+<span class="sd">        6e-6</span>
+<span class="sd">    force_positive : bool</span>
+<span class="sd">        make sure the solution is always non-negative - in a hacky way. Default</span>
+<span class="sd">        False</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        print residue of the solution and its maximum and minimum values</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    solution : 2-d array of the same shape of the landscape input </span>
+<span class="sd">        the solution</span>
+
+
+<span class="sd">    .. rubric:: Boundary and interface conditions</span>
+
+<span class="sd">    External boundaries are of the form</span>
+
+<span class="sd">    .. math:: a \nabla u \cdot \hat{n} + b u + c = 0</span>
+
+<span class="sd">    and may be different for left, right, top, bottom.  The derivative of u is</span>
+<span class="sd">    taken along the normal to the boundary.</span>
+
+<span class="sd">    The interfaces between patches and matrix are given by</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        u_i(x) &amp;= \gamma_{ij} u_j(x) \\</span>
+<span class="sd">        D_i \nabla u_i(x) \cdot \hat{n} &amp;= D_j \nabla u_j(x) \cdot \hat{n}</span>
+
+<span class="sd">    Usually the discontinuity $\gamma_{ij}$ is a result of different</span>
+<span class="sd">    diffusivities and preference at the border (see Ovaskainen and Cornell</span>
+<span class="sd">    2003). In that case, given a preference $\alpha_{ij}$ (between 0 and 1,</span>
+<span class="sd">    exclusive) towards $i$, this parameter should be:</span>
+
+<span class="sd">    .. math:: \gamma_{ij} = \frac{D_j}{D_i} \frac{\alpha_{ij}}{1-\alpha_{ij}}</span>
+
+<span class="sd">    This last condition is used in case $\gamma$ is not set. If $\alpha isn&#39;t</span>
+<span class="sd">    set either, it&#39;s assumed $\alpha = 1/2$. Notice that $\alpha_{ij} +</span>
+<span class="sd">    \alpha_{ji} = 1$. To ensure this condition, the key (i,j) is always taken</span>
+<span class="sd">    with $i&gt;j$.</span>
+
+<span class="sd">    These conditions are handled using an asymetric finite difference scheme</span>
+<span class="sd">    for the 2nd derivative:</span>
+
+<span class="sd">    .. math:: u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))</span>
+
+<span class="sd">    At the interface, $u(x+h/2)$ and $v(x+h/2)$ must obey:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        u(x+h/2) &amp;= \gamma v(x+h/2) \\</span>
+<span class="sd">        D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))</span>
+
+<span class="sd">    Solving this system, we arrive at the approximation at the interface:</span>
+
+<span class="sd">    .. math:: u(x+h/2) = \frac{D_m v(x+h)+D_p u(x)}{D_p+D_m / \gamma}</span>
+
+<span class="sd">    if u(x) is in a patch and v(x+h) is in the matrix, or</span>
+
+<span class="sd">    .. math:: v(x+h/2) = \frac{D_m v(x)+D_p u(x+h)}{D_p \gamma +D_m}</span>
+
+<span class="sd">    if v(x) is in the matrix and u(x+h) is in a patch.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">newton_krylov</span>
+
+    <span class="k">if</span> <span class="s1">&#39;g&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;alpha&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">par</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span>
+
+    <span class="p">(</span><span class="n">al</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span> <span class="n">cl</span><span class="p">)</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">br</span><span class="p">,</span> <span class="n">cr</span><span class="p">)</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="n">bt</span><span class="p">,</span> <span class="n">ct</span><span class="p">)</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">bb</span><span class="p">,</span> <span class="n">cb</span><span class="p">)</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+        <span class="n">li</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">landscape</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">D</span><span class="p">[</span><span class="n">li</span><span class="p">]</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">r</span><span class="p">[</span><span class="n">li</span><span class="p">]</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">c</span><span class="p">[</span><span class="n">li</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="n">Bx</span><span class="p">,</span> <span class="n">By</span> <span class="o">=</span> <span class="n">find_interfaces</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">factor</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">][(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]),</span>
+                        <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">][(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]),</span>
+                        <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">][(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]),</span>
+                        <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">][(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)])</span>
+                        <span class="p">]</span>
+
+    <span class="n">factor_pp</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">])</span>
+    <span class="n">factor_pm</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">])</span>
+    <span class="n">factor_mp</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">])</span>
+    <span class="n">factor_mm</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">residual</span><span class="p">(</span><span class="n">P</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">force_positive</span><span class="p">:</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+        <span class="n">d2x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+        <span class="n">d2y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+
+        <span class="n">d2x</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="mi">2</span><span class="p">:,:]</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">P</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">,:]</span>
+        <span class="c1"># external boundaries</span>
+        <span class="n">d2x</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">cl</span> <span class="o">-</span> <span class="n">al</span><span class="o">/</span><span class="n">dx</span> <span class="o">*</span> <span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span><span class="o">/</span><span class="p">(</span><span class="n">bl</span> <span class="o">-</span> <span class="n">al</span><span class="o">/</span><span class="n">dx</span><span class="p">)</span>
+        <span class="n">d2x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">cr</span> <span class="o">+</span> <span class="n">ar</span><span class="o">/</span><span class="n">dx</span> <span class="o">*</span> <span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:])</span><span class="o">/</span><span class="p">(</span><span class="n">br</span> <span class="o">+</span> <span class="n">ar</span><span class="o">/</span><span class="n">dx</span><span class="p">)</span>
+        <span class="c1"># interface conditions</span>
+        <span class="n">d2x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">+=</span> <span class="n">Bxpm</span> <span class="o">*</span> <span class="p">(</span><span class="n">P</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">*</span> <span class="n">factor_pp</span> <span class="o">+</span> <span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:]</span> <span class="o">*</span> <span class="n">factor_pm</span><span class="p">)</span> <span class="o">+</span> \
+                <span class="n">Bxmp</span> <span class="o">*</span> <span class="p">(</span><span class="n">P</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">*</span> <span class="n">factor_mm</span> <span class="o">+</span> <span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:]</span> <span class="o">*</span> <span class="n">factor_mp</span><span class="p">)</span>
+        <span class="n">d2x</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:]</span> <span class="o">+=</span> <span class="n">Bxpm</span> <span class="o">*</span> <span class="p">(</span><span class="n">P</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">*</span> <span class="n">factor_mp</span> <span class="o">+</span> <span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:]</span> <span class="o">*</span> <span class="n">factor_mm</span><span class="p">)</span> <span class="o">+</span> \
+                <span class="n">Bxmp</span> <span class="o">*</span> <span class="p">(</span><span class="n">P</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">*</span> <span class="n">factor_pm</span> <span class="o">+</span> <span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:]</span> <span class="o">*</span> <span class="n">factor_pp</span><span class="p">)</span>
+        <span class="n">d2x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">*=</span> <span class="p">(</span><span class="n">Bxpm</span><span class="o">+</span><span class="n">Bxmp</span><span class="p">)</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span> <span class="o">+</span> <span class="n">Bxpm</span><span class="o">*</span><span class="n">Bxmp</span><span class="o">/</span><span class="mf">3.</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Bxpm</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">d2y</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">P</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># external boundaries</span>
+        <span class="n">d2y</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">cb</span> <span class="o">-</span> <span class="n">ab</span><span class="o">/</span><span class="n">dx</span> <span class="o">*</span> <span class="n">P</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">bb</span> <span class="o">-</span> <span class="n">ab</span><span class="o">/</span><span class="n">dx</span><span class="p">)</span>
+        <span class="n">d2y</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">ct</span> <span class="o">+</span> <span class="n">at</span><span class="o">/</span><span class="n">dx</span> <span class="o">*</span> <span class="n">P</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">bt</span> <span class="o">+</span> <span class="n">at</span><span class="o">/</span><span class="n">dx</span><span class="p">)</span>
+        <span class="c1"># interface conditions</span>
+        <span class="n">d2y</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Bypm</span> <span class="o">*</span> <span class="p">(</span><span class="n">P</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor_pp</span> <span class="o">+</span> <span class="n">P</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">factor_pm</span><span class="p">)</span> <span class="o">+</span> \
+                <span class="n">Bymp</span> <span class="o">*</span> <span class="p">(</span><span class="n">P</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor_mm</span> <span class="o">+</span> <span class="n">P</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">factor_mp</span><span class="p">)</span>
+        <span class="n">d2y</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+=</span> <span class="n">Bypm</span> <span class="o">*</span> <span class="p">(</span><span class="n">P</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor_mp</span> <span class="o">+</span> <span class="n">P</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">factor_mm</span><span class="p">)</span> <span class="o">+</span> \
+                <span class="n">Bymp</span> <span class="o">*</span> <span class="p">(</span><span class="n">P</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor_pm</span> <span class="o">+</span> <span class="n">P</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">factor_pp</span><span class="p">)</span>
+        <span class="n">d2y</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="n">Bypm</span><span class="o">+</span><span class="n">Bymp</span><span class="p">)</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span> <span class="o">+</span> <span class="n">Bypm</span><span class="o">*</span><span class="n">Bymp</span><span class="o">/</span><span class="mf">3.</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Bypm</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">D</span><span class="o">*</span><span class="p">(</span><span class="n">d2x</span> <span class="o">+</span> <span class="n">d2y</span><span class="p">)</span><span class="o">/</span><span class="n">dx</span><span class="o">/</span><span class="n">dx</span> <span class="o">+</span> <span class="n">r</span><span class="o">*</span><span class="n">P</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="n">P</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="c1"># solve</span>
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">newton_krylov</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;lgmres&#39;</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="n">f_tol</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">force_positive</span><span class="p">:</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Residual: </span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">abs</span><span class="p">(</span><span class="n">residual</span><span class="p">(</span><span class="n">sol</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;max. pop.: </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sol</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;min. pop.: </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sol</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">sol</span></div>
+
+
 <div class="viewcode-block" id="find_interfaces"><a class="viewcode-back" href="../stubs/landscape.html#landscape.find_interfaces">[docs]</a><span class="k">def</span> <span class="nf">find_interfaces</span><span class="p">(</span><span class="n">landscape</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Helper function that marks where are the internal boundaries.&#39;&#39;&#39;</span>
     <span class="n">B</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">landscape</span> <span class="o">-</span> <span class="mi">1</span>
@@ -251,6 +431,35 @@
     <span class="n">Bypm</span> <span class="o">=</span> <span class="p">(</span><span class="n">By</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
     <span class="n">Bymp</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">By</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
     <span class="k">return</span> <span class="n">Bxpm</span><span class="p">,</span> <span class="n">Bxmp</span><span class="p">,</span> <span class="n">Bypm</span><span class="p">,</span> <span class="n">Bymp</span></div>
+
+<div class="viewcode-block" id="find_interfaces_ntypes"><a class="viewcode-back" href="../stubs/landscape.html#landscape.find_interfaces_ntypes">[docs]</a><span class="k">def</span> <span class="nf">find_interfaces_ntypes</span><span class="p">(</span><span class="n">landscape</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Determines internal boundaries for landscapes with many habitat types.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    landscape : 2-d array</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Bx, By : tuple of two dicts</span>
+<span class="sd">        each key is a tuple (i,j) corresponding to the numbers of the habitat</span>
+<span class="sd">        types, and the value corresponds to the indices where a boundary</span>
+<span class="sd">        between them appears, along either the x or y direction</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">landscape</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+    <span class="n">Ax</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:]</span> <span class="o">-</span> <span class="n">A</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+    <span class="n">Ay</span> <span class="o">=</span> <span class="n">A</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">A</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">Bx</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">By</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">Bx</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ax</span> <span class="o">==</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="o">**</span><span class="n">j</span><span class="p">)</span>
+                <span class="n">By</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ay</span> <span class="o">==</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="o">**</span><span class="n">j</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Bx</span><span class="p">,</span> <span class="n">By</span></div>
 
 <div class="viewcode-block" id="solve_multiple_parameters"><a class="viewcode-back" href="../stubs/landscape.html#landscape.solve_multiple_parameters">[docs]</a><span class="k">def</span> <span class="nf">solve_multiple_parameters</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">landscape</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span>
         <span class="n">f_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiprocess</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>

@@ -7,7 +7,6 @@ Welcome to documentation on EllipLand!
     landscape
     landscape_nspecies
     landscape_nspecies_gen
-    landscape_generic
     analise
     area_frag
 

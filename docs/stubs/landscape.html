@@ -91,6 +91,24 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="landscape.find_interfaces_ntypes">
+<code class="descclassname">landscape.</code><code class="descname">find_interfaces_ntypes</code><span class="sig-paren">(</span><em>landscape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#find_interfaces_ntypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.find_interfaces_ntypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines internal boundaries for landscapes with many habitat types.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>landscape</strong> (<em>2-d array</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Bx, By</strong> (<em>tuple of two dicts</em>) – each key is a tuple (i,j) corresponding to the numbers of the habitat
+types, and the value corresponds to the indices where a boundary
+between them appears, along either the x or y direction</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="landscape.image_to_landscape">
 <code class="descclassname">landscape.</code><code class="descname">image_to_landscape</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#image_to_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.image_to_landscape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts an image (in any RGB format) to a 2d array of ones and zeroes.</p>
@@ -182,7 +200,7 @@ v_t(x) &amp;= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{ in the matrix}\end{split}\
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>landscape</strong> (<em>2-d array of ints</em>) – describe the landscape, with 1 on patches and 0 on matrix</li>
-<li><strong>par</strong> (<em>ordered dict</em>) – <p>parameters in the following order:</p>
+<li><strong>par</strong> (<em>dict</em>) – <p>parameters (dict keys):</p>
 <ul>
 <li>r : reproductive rate on patches</li>
 <li>K : carrying capacity on patches</li>
@@ -237,6 +255,90 @@ an asymetric finite difference scheme for the 2nd derivative:</p>
 <div class="math notranslate nohighlight">
 \[u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))\]</div>
 <p>At the interface, <cite>u(x+h/2):math:</cite> and <a href="#id1"><span class="problematic" id="id2">`</span></a>v(x+h/2)$ must obey:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}u(x+h/2) &amp;= \gamma v(x+h/2) \\
+D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))\end{split}\]</div>
+<p>Solving this system, we arrive at the approximation at the interface:</p>
+<div class="math notranslate nohighlight">
+\[u(x+h/2) = \frac{D_m v(x+h)+D_p u(x)}{D_p+D_m / \gamma}\]</div>
+<p>if u(x) is in a patch and v(x+h) is in the matrix, or</p>
+<div class="math notranslate nohighlight">
+\[v(x+h/2) = \frac{D_m v(x)+D_p u(x+h)}{D_p \gamma +D_m}\]</div>
+<p>if v(x) is in the matrix and u(x+h) is in a patch.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="landscape.solve_landscape_ntypes">
+<code class="descclassname">landscape.</code><code class="descname">solve_landscape_ntypes</code><span class="sig-paren">(</span><em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>force_positive=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_landscape_ntypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_landscape_ntypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the stationary solution for a given landscape and set of parameters.</p>
+<p>Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
+stationary solution (or the solution to the elliptical problem) to the
+system of equations in 2 dimensions (x is a 2-d vector):</p>
+<div class="math notranslate nohighlight">
+\[u_{i_t}(x) &amp;= D_i \nabla^2 u_i(x) + r_i u_i(1-u(x)/K_i) = 0\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>landscape</strong> (<em>2-d array of ints</em>) – describe the landscape, with any number of habitat types</li>
+<li><strong>par</strong> (<em>dict</em>) – <p>parameters (dict keys):</p>
+<ul>
+<li>r : growth rates (can be negative)</li>
+<li>K : carrying capacities (cn be np.Inf)</li>
+<li>mu : mortality rate in the matrix</li>
+<li>D : diffusivities</li>
+<li>g : dict of habitat discontinuities <span class="math notranslate nohighlight">\(\gamma_{ij}\)</span> - see interface
+conditions below. The keys are tuples (i,j) of the habitat
+types indices (optional)</li>
+<li>alpha : dict of habitat preferences, only taken into account if g is
+not present. In that case, <span class="math notranslate nohighlight">\(\gamma_{ij}\)</span> is calculated as
+<span class="math notranslate nohighlight">\(\gamma_{ij} = D_j \alpha_{ij} / (D_i*(1-\alpha_{ij}))\)</span> (optional)</li>
+<li>left : (a, b, c): external boundary conditions at left border</li>
+<li>right : (a, b, c): external boundary conditions at right border</li>
+<li>top : (a, b, c): external boundary conditions at top border</li>
+<li>bottom : (a, b, c): external boundary conditions at bottom border</li>
+</ul>
+</li>
+<li><strong>dx</strong> (<em>float</em>) – lenght of each edge</li>
+<li><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine.  Default is
+6e-6</li>
+<li><strong>force_positive</strong> (<em>bool</em>) – make sure the solution is always non-negative - in a hacky way. Default
+False</li>
+<li><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>solution</strong> (<em>2-d array of the same shape of the landscape input</em>) – the solution</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Boundary and interface conditions</p>
+<p>External boundaries are of the form</p>
+<div class="math notranslate nohighlight">
+\[a \nabla u \cdot \hat{n} + b u + c = 0\]</div>
+<p>and may be different for left, right, top, bottom.  The derivative of u is
+taken along the normal to the boundary.</p>
+<p>The interfaces between patches and matrix are given by</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}u_i(x) &amp;= \gamma_{ij} u_j(x) \\
+D_i \nabla u_i(x) \cdot \hat{n} &amp;= D_j \nabla u_j(x) \cdot \hat{n}\end{split}\]</div>
+<p>Usually the discontinuity <span class="math notranslate nohighlight">\(\gamma_{ij}\)</span> is a result of different
+diffusivities and preference at the border (see Ovaskainen and Cornell
+2003). In that case, given a preference <span class="math notranslate nohighlight">\(\alpha_{ij}\)</span> (between 0 and 1,
+exclusive) towards <span class="math notranslate nohighlight">\(i\)</span>, this parameter should be:</p>
+<div class="math notranslate nohighlight">
+\[\gamma_{ij} = \frac{D_j}{D_i} \frac{\alpha_{ij}}{1-\alpha_{ij}}\]</div>
+<p>This last condition is used in case <span class="math notranslate nohighlight">\(\gamma\)</span> is not set. If <span class="math notranslate nohighlight">\(\alpha isn't
+set either, it's assumed \)</span>. Notice that <cite>alpha_{ij} +
+alpha_{ji} = 1:math:</cite>. To ensure this condition, the key (i,j) is always taken
+with <cite>i&gt;j:math:</cite>.</p>
+<p>These conditions are handled using an asymetric finite difference scheme
+for the 2nd derivative:</p>
+<div class="math notranslate nohighlight">
+\[u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))\]</div>
+<p>At the interface, <cite>u(x+h/2):math:</cite> and <a href="#id3"><span class="problematic" id="id4">`</span></a>v(x+h/2)$ must obey:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}u(x+h/2) &amp;= \gamma v(x+h/2) \\
 D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))\end{split}\]</div>
