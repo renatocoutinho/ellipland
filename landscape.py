@@ -15,7 +15,7 @@ par = OrderedDict([
     ('Dp', 1e-4),
     ('Dm', 1e-3),
     # interface condition (=Dm/Dp)
-    ('g', 1.),
+    #('g', 1.), # no longer required
     # boundary conditions
     ('left', [1., 0., 0.]),
     ('right', [1., 0., 0.]),
@@ -304,10 +304,11 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
 
     Example
     -------
+    >>> # simple patch/matrix
     >>> from landscape import *
     >>> parn = OrderedDict([
         ('r', [-0.03, 0.1]),
-        ('K', [inf, 1.0]),
+        ('K', [np.Inf, 1.0]),
         ('D', [0.001, 0.0001]),
         ('left', [1.0, 0.0, 0.0]),
         ('right', [1.0, 0.0, 0.0]),
@@ -316,7 +317,7 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         ])
     >>> l = np.zeros((100,100), dtype=int)
     >>> l[40:60, 40:60] = 1
-    >>> sol = solve_landscape_ntypes(l, par, dx)
+    >>> sol = solve_landscape_ntypes(l, parn, dx)
 
     """
     from scipy.optimize import newton_krylov
