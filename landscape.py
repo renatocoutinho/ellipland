@@ -57,15 +57,19 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
     ----------
     landscape : 2-d array of ints
         describe the landscape, with 1 on patches and 0 on matrix
-    par : ordered dict
-        parameters in the following order: 
+    par : dict
+        parameters (dict keys): 
 
         - r : reproductive rate on patches
         - K : carrying capacity on patches
         - mu : mortality rate in the matrix
         - Dp : diffusivity on patches
         - Dm : diffusivity in the matrix
-        - g : habitat preference parameter \gamma, usually less than one. See interface conditions below
+        - g : habitat discontinuity parameter \gamma, usually less than one. See
+          interface conditions below (optional)
+        - alpha : habitat preference, only taken into account if g is not
+          present. In that case, g is calculated as g = Dm * alpha /
+          (Dp*(1-alpha))
         - left : (a, b, c): external boundary conditions at left border
         - right : (a, b, c): external boundary conditions at right border
         - top : (a, b, c): external boundary conditions at top border
@@ -110,8 +114,9 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
 
     .. math:: \gamma = \frac{D_m}{D_p} \frac{\alpha}{1-\alpha}
 
-    These conditions are handled using an asymetric finite difference scheme
-    for the 2nd derivative:
+    This last condition is used in case $\gamma$ is not set. If $\alpha isn't
+    set either, it's assumed $\alpha = 1/2$. These conditions are handled using
+    an asymetric finite difference scheme for the 2nd derivative:
 
     .. math:: u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))
 
@@ -134,18 +139,28 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
     """
     from scipy.optimize import newton_krylov
 
-    (r, K, mu, Dp, Dm, g, (al, bl, cl), (ar, br, cr), (at, bt, ct), (ab, bb,
-        cb)) = par.values()
+    if 'g' not in par.keys():
+        if 'alpha' not in par.keys():
+            par['alpha'] = 0.5
+        par['g'] = par['Dm']/par['Dp'] * par['alpha'] / (1-par['alpha'])
 
-    lin_term = r * landscape - mu * (1-landscape)
-    sec_term = - landscape * r / K
-    D = landscape * Dp + (1-landscape) * Dm
+    # not a good idea
+    #(r, K, mu, Dp, Dm, g, (al, bl, cl), (ar, br, cr), (at, bt, ct), (ab, bb,
+    #    cb)) = par.values()
+    (al, bl, cl) = par['left']
+    (ar, br, cr) = par['right']
+    (at, bt, ct) = par['top']
+    (ab, bb, cb) = par['bottom']
+
+    lin_term = par['r'] * landscape - par['mu'] * (1-landscape)
+    sec_term = - landscape * par['r'] / par['K']
+    D = landscape * par['Dp'] + (1-landscape) * par['Dm']
 
     Bxpm, Bxmp, Bypm, Bymp = find_interfaces(landscape)
-    factor_pp = -1. + 2. * Dp/(Dp+Dm/g)
-    factor_pm = -1. + 2. * Dm/(Dp+Dm/g)
-    factor_mp = -1. + 2. * Dp/(Dp*g+Dm)
-    factor_mm = -1. + 2. * Dm/(Dp*g+Dm)
+    factor_pp = -1. + 2. * par['Dp']/(par['Dp']+par['Dm']/par['g'])
+    factor_pm = -1. + 2. * par['Dm']/(par['Dp']+par['Dm']/par['g'])
+    factor_mp = -1. + 2. * par['Dp']/(par['Dp']*par['g']+par['Dm'])
+    factor_mm = -1. + 2. * par['Dm']/(par['Dp']*par['g']+par['Dm'])
 
     def residual(P):
         if force_positive:
@@ -178,7 +193,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
         return D*(d2x + d2y)/dx/dx + lin_term*P + sec_term*P**2
 
     # solve
-    guess = K * np.ones_like(landscape)
+    guess = par['K'] * np.ones_like(landscape)
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
     if force_positive:
         sol = np.abs(sol)
@@ -269,7 +284,7 @@ def solve_multiple_parameters(variables, values, landscape, par, dx,
     return solutions
 
 def solve_multiple_landscapes(landscapes, par, dx, f_tol=None, verbose=True,
-        multiprocess=True):
+        force_positive=True, multiprocess=True):
     '''Solve several landscapes.
 
     Solves a set of landscape with a given set of parameters, optionally using
@@ -277,49 +292,51 @@ def solve_multiple_landscapes(landscapes, par, dx, f_tol=None, verbose=True,
 
     Parameters
     ----------
-    landscape : list of 2-d array of zeroes and ones describing the landscape
-    par : values for all the problem parameters. See documentation for
+    landscape : list of 2-d arrays
+        zeroes and ones describing the landscape
+    par : ordered dict
+        values for all the problem parameters. See documentation for
         `solve_landscape()`
-    dx : lenght of each edge
-    f_tol : float, tolerance for the residue, passed on to the solver routine.
-        Default is 6e-6
-    verbose : print residue of the solution and its maximum and minimum values.
+    dx : float
+        lenght of each edge
+    f_tol : float
+        tolerance for the residue, passed on to the solver routine. Default is
+        6e-6
+    verbose : bool
+        print residue of the solution and its maximum and minimum values.
         Notice that the order of appearance of each output is not the same as
         the input if multiprocess is True.
-    multiprocess : determines whether to use multiprocessing to use multiple
-        cores. True by default, in which case the total number of CPUs minus
-        one are used
+    multiprocess : bool
+        whether to use multiprocessing to use multiple cores. True by default,
+        in which case the total number of CPUs minus one are used
 
     Returns
     -------
-    solutions : list containing the solutions to each landscape, in the same
-        ordering of the input values
+    solutions : list os 2-d arrays
+        solutions to each landscape, in the same ordering of the input values
 
     Example
     -------
     >>> from landscape import *
-    >>> lA = image_to_landscape('landA.tif')
-    >>> lB = image_to_landscape('landB.tif')
-    >>> lC = image_to_landscape('landC.tif')
-    >>> ll = [lA, B, lC]
-    >>> sols = solve_multiple_parameters(ll, par, dx)
+    >>> l = [ random_landscape(i*100, 0.8, 100) for i in range(30,70,10) ]
+    >>> sols = solve_multiple_landscapes(l, par, dx)
 
     '''
     from functools import partial
     # this is not compatible with python 2.6 when using multiprocessing, due to
     # bug http://bugs.python.org/issue5228
     solve_landscape_wrapper = partial(solve_landscape, par=par, dx=dx,
-            f_tol=f_tol, verbose=verbose)
+            f_tol=f_tol, force_positive=force_positive, verbose=verbose)
 
     if multiprocess:
         from multiprocessing import Pool, cpu_count
         cpus = cpu_count()
         pool = Pool(cpus if cpus == 1 else cpus - 1)
-        solutions = pool.map(solve_landscape_wrapper, ll)
+        solutions = pool.map(solve_landscape_wrapper, landscapes)
         pool.close()
         pool.join()
     else:
-        solutions = map(solve_landscape_wrapper, works)
+        solutions = map(solve_landscape_wrapper, landscapes)
 
     return solutions
 
@@ -334,13 +351,15 @@ def image_to_landscape(image):
 
     Parameters
     ----------
-    image : an image filename
+    image : string
+        image filename
 
     Returns
     -------
-    landscape : a 2-d array of ones and zeroes, where ones correspond to darker
-        shades in the original image, which should correspond to patch, while
-        the lighter shades represent the matrix
+    landscape : 2-d array 
+        ones and zeroes, where ones correspond to darker shades in the original
+        image, which should correspond to patch, while the lighter shades
+        represent the matrix
 
     '''
     from scipy.ndimage import imread
@@ -401,7 +420,7 @@ def random_landscape(cover, frag, size, radius=1, norm='taxicab'):
         for x in range(-radius, radius+1):
             indexes += [(x, y) for y in range(-radius+abs(x), radius+1-abs(x))]
         indexes.remove((0, 0))
-        indexes = array(indexes)
+        indexes = np.array(indexes)
         while n < cover:
             i, j = randint(radius, size+radius, 2)
             if M[i, j]:
@@ -433,14 +452,16 @@ def popcount_patches(landscape, solution):
 
     Parameters
     ----------
-    landscape : 2-d array of ones and zeroes
-    solution : 2-d array containing the solution to the system
+    landscape : 2-d array 
+        ones and zeroes representing patches and matrix
+    solution : 2-d array
+        solution to the system
 
     Returns
     -------
-    array : 2-d array where the first line is the area and the second is the
-        total population. The first column is the total area and population in
-        the matrix.
+    array : 2-d array 
+        the first line is the area and the second is the total population. The
+        first column is the total area and population in the matrix.
 
     '''
     count, labeled = statistics_landscape(landscape, labels=True)
@@ -456,16 +477,19 @@ def statistics_landscape(landscape, labels=False):
 
     Parameters
     ----------
-    landscape : 2-d array of ones and zeroes
-    labels : if True, also return the labeled 2-d array landscape
+    landscape : 2-d array
+        ones and zeroes representing patches and matrix
+    labels : bool
+        if True, return the labeled 2-d array landscape
 
     Returns
     -------
-    array : 2-d array where the first line is the area and the second is the
-        total population. The first column is the total area and population in
-        the matrix.
-    labeled : if parameter 'labels' is True, return a tuple (array, labeled),
-        where the second element is the labeled 2-d array landscape
+    array : 2-d array 
+        the first line is the area and the second is the total population. The
+        first column is the total area and population in the matrix.
+    labeled : tuple
+        if `labels` is True, returns a tuple (array, labeled), where the second
+        element is the labeled 2-d array landscape
 
     '''
     from scipy.ndimage import label

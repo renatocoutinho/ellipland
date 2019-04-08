@@ -101,7 +101,11 @@
 <span class="sd">        - mu : mortality rate in the matrix</span>
 <span class="sd">        - Dp : diffusivity on patches</span>
 <span class="sd">        - Dm : diffusivity in the matrix</span>
-<span class="sd">        - g : habitat preference parameter \gamma, usually less than one. See interface conditions below</span>
+<span class="sd">        - g : habitat discontinuity parameter \gamma, usually less than one. See</span>
+<span class="sd">          interface conditions below (optional)</span>
+<span class="sd">        - alpha : habitat preference, only taken into account if g is not</span>
+<span class="sd">          present. In that case, g is calculated as g = Dm * alpha /</span>
+<span class="sd">          (Dp*(1-alpha))</span>
 <span class="sd">        - left : (a, b, c): external boundary conditions at left border</span>
 <span class="sd">        - right : (a, b, c): external boundary conditions at right border</span>
 <span class="sd">        - top : (a, b, c): external boundary conditions at top border</span>
@@ -146,8 +150,9 @@
 
 <span class="sd">    .. math:: \gamma = \frac{D_m}{D_p} \frac{\alpha}{1-\alpha}</span>
 
-<span class="sd">    These conditions are handled using an asymetric finite difference scheme</span>
-<span class="sd">    for the 2nd derivative:</span>
+<span class="sd">    This last condition is used in case $\gamma$ is not set. If $\alpha isn&#39;t</span>
+<span class="sd">    set either, it&#39;s assumed $\alpha = 1/2$. These conditions are handled using</span>
+<span class="sd">    an asymetric finite difference scheme for the 2nd derivative:</span>
 
 <span class="sd">    .. math:: u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))</span>
 
@@ -170,18 +175,28 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">newton_krylov</span>
 
-    <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">Dp</span><span class="p">,</span> <span class="n">Dm</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="p">(</span><span class="n">al</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span> <span class="n">cl</span><span class="p">),</span> <span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">br</span><span class="p">,</span> <span class="n">cr</span><span class="p">),</span> <span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="n">bt</span><span class="p">,</span> <span class="n">ct</span><span class="p">),</span> <span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">bb</span><span class="p">,</span>
-        <span class="n">cb</span><span class="p">))</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s1">&#39;g&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;alpha&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">par</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">par</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span>
 
-    <span class="n">lin_term</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">landscape</span> <span class="o">-</span> <span class="n">mu</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">sec_term</span> <span class="o">=</span> <span class="o">-</span> <span class="n">landscape</span> <span class="o">*</span> <span class="n">r</span> <span class="o">/</span> <span class="n">K</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="n">landscape</span> <span class="o">*</span> <span class="n">Dp</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">landscape</span><span class="p">)</span> <span class="o">*</span> <span class="n">Dm</span>
+    <span class="c1"># not a good idea</span>
+    <span class="c1">#(r, K, mu, Dp, Dm, g, (al, bl, cl), (ar, br, cr), (at, bt, ct), (ab, bb,</span>
+    <span class="c1">#    cb)) = par.values()</span>
+    <span class="p">(</span><span class="n">al</span><span class="p">,</span> <span class="n">bl</span><span class="p">,</span> <span class="n">cl</span><span class="p">)</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">br</span><span class="p">,</span> <span class="n">cr</span><span class="p">)</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="n">bt</span><span class="p">,</span> <span class="n">ct</span><span class="p">)</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>
+    <span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">bb</span><span class="p">,</span> <span class="n">cb</span><span class="p">)</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span>
+
+    <span class="n">lin_term</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">landscape</span> <span class="o">-</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">landscape</span><span class="p">)</span>
+    <span class="n">sec_term</span> <span class="o">=</span> <span class="o">-</span> <span class="n">landscape</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">]</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">landscape</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">landscape</span><span class="p">)</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span>
 
     <span class="n">Bxpm</span><span class="p">,</span> <span class="n">Bxmp</span><span class="p">,</span> <span class="n">Bypm</span><span class="p">,</span> <span class="n">Bymp</span> <span class="o">=</span> <span class="n">find_interfaces</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">factor_pp</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">Dp</span><span class="o">/</span><span class="p">(</span><span class="n">Dp</span><span class="o">+</span><span class="n">Dm</span><span class="o">/</span><span class="n">g</span><span class="p">)</span>
-    <span class="n">factor_pm</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">Dm</span><span class="o">/</span><span class="p">(</span><span class="n">Dp</span><span class="o">+</span><span class="n">Dm</span><span class="o">/</span><span class="n">g</span><span class="p">)</span>
-    <span class="n">factor_mp</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">Dp</span><span class="o">/</span><span class="p">(</span><span class="n">Dp</span><span class="o">*</span><span class="n">g</span><span class="o">+</span><span class="n">Dm</span><span class="p">)</span>
-    <span class="n">factor_mm</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">Dm</span><span class="o">/</span><span class="p">(</span><span class="n">Dp</span><span class="o">*</span><span class="n">g</span><span class="o">+</span><span class="n">Dm</span><span class="p">)</span>
+    <span class="n">factor_pp</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">])</span>
+    <span class="n">factor_pm</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">])</span>
+    <span class="n">factor_mp</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">])</span>
+    <span class="n">factor_mm</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">residual</span><span class="p">(</span><span class="n">P</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">force_positive</span><span class="p">:</span>
@@ -214,7 +229,7 @@
         <span class="k">return</span> <span class="n">D</span><span class="o">*</span><span class="p">(</span><span class="n">d2x</span> <span class="o">+</span> <span class="n">d2y</span><span class="p">)</span><span class="o">/</span><span class="n">dx</span><span class="o">/</span><span class="n">dx</span> <span class="o">+</span> <span class="n">lin_term</span><span class="o">*</span><span class="n">P</span> <span class="o">+</span> <span class="n">sec_term</span><span class="o">*</span><span class="n">P</span><span class="o">**</span><span class="mi">2</span>
 
     <span class="c1"># solve</span>
-    <span class="n">guess</span> <span class="o">=</span> <span class="n">K</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
     <span class="n">sol</span> <span class="o">=</span> <span class="n">newton_krylov</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;lgmres&#39;</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="n">f_tol</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">force_positive</span><span class="p">:</span>
         <span class="n">sol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
@@ -305,7 +320,7 @@
     <span class="k">return</span> <span class="n">solutions</span></div>
 
 <div class="viewcode-block" id="solve_multiple_landscapes"><a class="viewcode-back" href="../stubs/landscape.html#landscape.solve_multiple_landscapes">[docs]</a><span class="k">def</span> <span class="nf">solve_multiple_landscapes</span><span class="p">(</span><span class="n">landscapes</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">multiprocess</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">force_positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiprocess</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Solve several landscapes.</span>
 
 <span class="sd">    Solves a set of landscape with a given set of parameters, optionally using</span>
@@ -313,49 +328,51 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    landscape : list of 2-d array of zeroes and ones describing the landscape</span>
-<span class="sd">    par : values for all the problem parameters. See documentation for</span>
+<span class="sd">    landscape : list of 2-d arrays</span>
+<span class="sd">        zeroes and ones describing the landscape</span>
+<span class="sd">    par : ordered dict</span>
+<span class="sd">        values for all the problem parameters. See documentation for</span>
 <span class="sd">        `solve_landscape()`</span>
-<span class="sd">    dx : lenght of each edge</span>
-<span class="sd">    f_tol : float, tolerance for the residue, passed on to the solver routine.</span>
-<span class="sd">        Default is 6e-6</span>
-<span class="sd">    verbose : print residue of the solution and its maximum and minimum values.</span>
+<span class="sd">    dx : float</span>
+<span class="sd">        lenght of each edge</span>
+<span class="sd">    f_tol : float</span>
+<span class="sd">        tolerance for the residue, passed on to the solver routine. Default is</span>
+<span class="sd">        6e-6</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        print residue of the solution and its maximum and minimum values.</span>
 <span class="sd">        Notice that the order of appearance of each output is not the same as</span>
 <span class="sd">        the input if multiprocess is True.</span>
-<span class="sd">    multiprocess : determines whether to use multiprocessing to use multiple</span>
-<span class="sd">        cores. True by default, in which case the total number of CPUs minus</span>
-<span class="sd">        one are used</span>
+<span class="sd">    multiprocess : bool</span>
+<span class="sd">        whether to use multiprocessing to use multiple cores. True by default,</span>
+<span class="sd">        in which case the total number of CPUs minus one are used</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    solutions : list containing the solutions to each landscape, in the same</span>
-<span class="sd">        ordering of the input values</span>
+<span class="sd">    solutions : list os 2-d arrays</span>
+<span class="sd">        solutions to each landscape, in the same ordering of the input values</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; from landscape import *</span>
-<span class="sd">    &gt;&gt;&gt; lA = image_to_landscape(&#39;landA.tif&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; lB = image_to_landscape(&#39;landB.tif&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; lC = image_to_landscape(&#39;landC.tif&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; ll = [lA, B, lC]</span>
-<span class="sd">    &gt;&gt;&gt; sols = solve_multiple_parameters(ll, par, dx)</span>
+<span class="sd">    &gt;&gt;&gt; l = [ random_landscape(i*100, 0.8, 100) for i in range(30,70,10) ]</span>
+<span class="sd">    &gt;&gt;&gt; sols = solve_multiple_landscapes(l, par, dx)</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
     <span class="c1"># this is not compatible with python 2.6 when using multiprocessing, due to</span>
     <span class="c1"># bug http://bugs.python.org/issue5228</span>
     <span class="n">solve_landscape_wrapper</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">solve_landscape</span><span class="p">,</span> <span class="n">par</span><span class="o">=</span><span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span>
-            <span class="n">f_tol</span><span class="o">=</span><span class="n">f_tol</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">f_tol</span><span class="o">=</span><span class="n">f_tol</span><span class="p">,</span> <span class="n">force_positive</span><span class="o">=</span><span class="n">force_positive</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">multiprocess</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Pool</span><span class="p">,</span> <span class="n">cpu_count</span>
         <span class="n">cpus</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span>
         <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">cpus</span> <span class="k">if</span> <span class="n">cpus</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">cpus</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">solutions</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">solve_landscape_wrapper</span><span class="p">,</span> <span class="n">ll</span><span class="p">)</span>
+        <span class="n">solutions</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">solve_landscape_wrapper</span><span class="p">,</span> <span class="n">landscapes</span><span class="p">)</span>
         <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">solutions</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">solve_landscape_wrapper</span><span class="p">,</span> <span class="n">works</span><span class="p">)</span>
+        <span class="n">solutions</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">solve_landscape_wrapper</span><span class="p">,</span> <span class="n">landscapes</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">solutions</span></div>
 
@@ -370,13 +387,15 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    image : an image filename</span>
+<span class="sd">    image : string</span>
+<span class="sd">        image filename</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    landscape : a 2-d array of ones and zeroes, where ones correspond to darker</span>
-<span class="sd">        shades in the original image, which should correspond to patch, while</span>
-<span class="sd">        the lighter shades represent the matrix</span>
+<span class="sd">    landscape : 2-d array </span>
+<span class="sd">        ones and zeroes, where ones correspond to darker shades in the original</span>
+<span class="sd">        image, which should correspond to patch, while the lighter shades</span>
+<span class="sd">        represent the matrix</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="k">import</span> <span class="n">imread</span>
@@ -437,7 +456,7 @@
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">radius</span><span class="p">,</span> <span class="n">radius</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">indexes</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">radius</span><span class="o">+</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">radius</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">))]</span>
         <span class="n">indexes</span><span class="o">.</span><span class="n">remove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="n">indexes</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span>
         <span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">cover</span><span class="p">:</span>
             <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">size</span><span class="o">+</span><span class="n">radius</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]:</span>
@@ -469,14 +488,16 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    landscape : 2-d array of ones and zeroes</span>
-<span class="sd">    solution : 2-d array containing the solution to the system</span>
+<span class="sd">    landscape : 2-d array </span>
+<span class="sd">        ones and zeroes representing patches and matrix</span>
+<span class="sd">    solution : 2-d array</span>
+<span class="sd">        solution to the system</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array : 2-d array where the first line is the area and the second is the</span>
-<span class="sd">        total population. The first column is the total area and population in</span>
-<span class="sd">        the matrix.</span>
+<span class="sd">    array : 2-d array </span>
+<span class="sd">        the first line is the area and the second is the total population. The</span>
+<span class="sd">        first column is the total area and population in the matrix.</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">count</span><span class="p">,</span> <span class="n">labeled</span> <span class="o">=</span> <span class="n">statistics_landscape</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -492,16 +513,19 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    landscape : 2-d array of ones and zeroes</span>
-<span class="sd">    labels : if True, also return the labeled 2-d array landscape</span>
+<span class="sd">    landscape : 2-d array</span>
+<span class="sd">        ones and zeroes representing patches and matrix</span>
+<span class="sd">    labels : bool</span>
+<span class="sd">        if True, return the labeled 2-d array landscape</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    array : 2-d array where the first line is the area and the second is the</span>
-<span class="sd">        total population. The first column is the total area and population in</span>
-<span class="sd">        the matrix.</span>
-<span class="sd">    labeled : if parameter &#39;labels&#39; is True, return a tuple (array, labeled),</span>
-<span class="sd">        where the second element is the labeled 2-d array landscape</span>
+<span class="sd">    array : 2-d array </span>
+<span class="sd">        the first line is the area and the second is the total population. The</span>
+<span class="sd">        first column is the total area and population in the matrix.</span>
+<span class="sd">    labeled : tuple</span>
+<span class="sd">        if `labels` is True, returns a tuple (array, labeled), where the second</span>
+<span class="sd">        element is the labeled 2-d array landscape</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="k">import</span> <span class="n">label</span>
