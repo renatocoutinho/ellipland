@@ -101,11 +101,12 @@
 <span class="sd">        - mu : mortality rate in the matrix</span>
 <span class="sd">        - Dp : diffusivity on patches</span>
 <span class="sd">        - Dm : diffusivity in the matrix</span>
-<span class="sd">        - g : habitat discontinuity parameter \gamma, usually less than one. See</span>
-<span class="sd">          interface conditions below (optional)</span>
+<span class="sd">        - g : habitat discontinuity parameter \gamma. See interface conditions</span>
+<span class="sd">          below (optional, determined from Dp, Dm and alpha if absnt)</span>
 <span class="sd">        - alpha : habitat preference, only taken into account if g is not</span>
 <span class="sd">          present. In that case, g is calculated as g = Dm * alpha /</span>
-<span class="sd">          (Dp*(1-alpha))</span>
+<span class="sd">          (Dp*(1-alpha)) (optional, ignored if g is given, set to 1/2 if both</span>
+<span class="sd">          are absent)</span>
 <span class="sd">        - left : (a, b, c): external boundary conditions at left border</span>
 <span class="sd">        - right : (a, b, c): external boundary conditions at right border</span>
 <span class="sd">        - top : (a, b, c): external boundary conditions at top border</span>

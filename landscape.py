@@ -65,11 +65,12 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
         - mu : mortality rate in the matrix
         - Dp : diffusivity on patches
         - Dm : diffusivity in the matrix
-        - g : habitat discontinuity parameter \gamma, usually less than one. See
-          interface conditions below (optional)
+        - g : habitat discontinuity parameter \gamma. See interface conditions
+          below (optional, determined from Dp, Dm and alpha if absnt)
         - alpha : habitat preference, only taken into account if g is not
           present. In that case, g is calculated as g = Dm * alpha /
-          (Dp*(1-alpha))
+          (Dp*(1-alpha)) (optional, ignored if g is given, set to 1/2 if both
+          are absent)
         - left : (a, b, c): external boundary conditions at left border
         - right : (a, b, c): external boundary conditions at right border
         - top : (a, b, c): external boundary conditions at top border
