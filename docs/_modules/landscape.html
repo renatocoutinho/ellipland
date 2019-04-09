@@ -150,7 +150,7 @@
 
 <span class="sd">    .. math:: \gamma = \frac{D_m}{D_p} \frac{\alpha}{1-\alpha}</span>
 
-<span class="sd">    This last condition is used in case $\gamma$ is not set. If $\alpha isn&#39;t</span>
+<span class="sd">    This last condition is used in case $\gamma$ is not set. If $\alpha$ isn&#39;t</span>
 <span class="sd">    set either, it&#39;s assumed $\alpha = 1/2$. These conditions are handled using</span>
 <span class="sd">    an asymetric finite difference scheme for the 2nd derivative:</span>
 
@@ -171,6 +171,12 @@
 <span class="sd">    .. math:: v(x+h/2) = \frac{D_m v(x)+D_p u(x+h)}{D_p \gamma +D_m}</span>
 
 <span class="sd">    if v(x) is in the matrix and u(x+h) is in a patch.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Ovaskainen, Otso, and Stephen J. Cornell. &quot;Biased movement at a boundary</span>
+<span class="sd">    and conditional occupancy times for diffusion processes.&quot; Journal of</span>
+<span class="sd">    Applied Probability 40.3 (2003): 557-580.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">newton_krylov</span>
@@ -417,6 +423,7 @@
         <span class="n">d2x</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">cl</span> <span class="o">-</span> <span class="n">al</span><span class="o">/</span><span class="n">dx</span> <span class="o">*</span> <span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span><span class="o">/</span><span class="p">(</span><span class="n">bl</span> <span class="o">-</span> <span class="n">al</span><span class="o">/</span><span class="n">dx</span><span class="p">)</span>
         <span class="n">d2x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">cr</span> <span class="o">+</span> <span class="n">ar</span><span class="o">/</span><span class="n">dx</span> <span class="o">*</span> <span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:])</span><span class="o">/</span><span class="p">(</span><span class="n">br</span> <span class="o">+</span> <span class="n">ar</span><span class="o">/</span><span class="n">dx</span><span class="p">)</span>
         <span class="c1"># interface conditions</span>
+        <span class="c1"># TODO: probably something wrong here</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">fac</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">d2x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:][</span><span class="n">Bx</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">P</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">*</span> <span class="n">factor</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> \
                     <span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:]</span> <span class="o">*</span> <span class="n">factor</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)][</span><span class="mi">1</span><span class="p">])[</span><span class="n">Bx</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]]</span>

@@ -255,12 +255,12 @@ given a preference <span class="math notranslate nohighlight">\(\alpha\)</span> 
 this parameter should be:</p>
 <div class="math notranslate nohighlight">
 \[\gamma = \frac{D_m}{D_p} \frac{\alpha}{1-\alpha}\]</div>
-<p>This last condition is used in case <span class="math notranslate nohighlight">\(\gamma\)</span> is not set. If <span class="math notranslate nohighlight">\(\alpha isn't
-set either, it's assumed \)</span>. These conditions are handled using
+<p>This last condition is used in case <span class="math notranslate nohighlight">\(\gamma\)</span> is not set. If <span class="math notranslate nohighlight">\(\alpha\)</span> isn’t
+set either, it’s assumed <span class="math notranslate nohighlight">\(\alpha = 1/2\)</span>. These conditions are handled using
 an asymetric finite difference scheme for the 2nd derivative:</p>
 <div class="math notranslate nohighlight">
 \[u_{xx}(x) = \frac{4}{3h^2} (u(x-h) - 3 u(x) + 2 u(x+h/2))\]</div>
-<p>At the interface, <cite>u(x+h/2):math:</cite> and <a href="#id1"><span class="problematic" id="id2">`</span></a>v(x+h/2)$ must obey:</p>
+<p>At the interface, <span class="math notranslate nohighlight">\(u(x+h/2)\)</span> and <span class="math notranslate nohighlight">\(v(x+h/2)\)</span> must obey:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}u(x+h/2) &amp;= \gamma v(x+h/2) \\
 D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))\end{split}\]</div>
@@ -271,6 +271,10 @@ D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))\end{split}\]</div>
 <div class="math notranslate nohighlight">
 \[v(x+h/2) = \frac{D_m v(x)+D_p u(x+h)}{D_p \gamma +D_m}\]</div>
 <p>if v(x) is in the matrix and u(x+h) is in a patch.</p>
+<p class="rubric">References</p>
+<p>Ovaskainen, Otso, and Stephen J. Cornell. “Biased movement at a boundary
+and conditional occupancy times for diffusion processes.” Journal of
+Applied Probability 40.3 (2003): 557-580.</p>
 </dd></dl>
 
 <dl class="function">

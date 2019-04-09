@@ -114,7 +114,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
 
     .. math:: \gamma = \frac{D_m}{D_p} \frac{\alpha}{1-\alpha}
 
-    This last condition is used in case $\gamma$ is not set. If $\alpha isn't
+    This last condition is used in case $\gamma$ is not set. If $\alpha$ isn't
     set either, it's assumed $\alpha = 1/2$. These conditions are handled using
     an asymetric finite difference scheme for the 2nd derivative:
 
@@ -135,6 +135,12 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
     .. math:: v(x+h/2) = \frac{D_m v(x)+D_p u(x+h)}{D_p \gamma +D_m}
 
     if v(x) is in the matrix and u(x+h) is in a patch.
+
+    References
+    ----------
+    Ovaskainen, Otso, and Stephen J. Cornell. "Biased movement at a boundary
+    and conditional occupancy times for diffusion processes." Journal of
+    Applied Probability 40.3 (2003): 557-580.
 
     """
     from scipy.optimize import newton_krylov
