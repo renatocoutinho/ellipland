@@ -53,6 +53,11 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
         u_t(x) &= D_p \nabla^2 u(x) + ru(1-u(x)/K) = 0 \text{ in a patch} \\
         v_t(x) &= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{ in the matrix}
 
+    .. rubric:: Note
+        This function preserves the original interface, but internally it calls
+        the newer `solve_landscape_ntypes()`.
+
+
     Parameters
     ----------
     landscape : 2-d array of ints
@@ -66,7 +71,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
         - Dp : diffusivity on patches
         - Dm : diffusivity in the matrix
         - g : habitat discontinuity parameter \gamma. See interface conditions
-          below (optional, determined from Dp, Dm and alpha if absnt)
+          below (optional, determined from Dp, Dm and alpha if absent)
         - alpha : habitat preference, only taken into account if g is not
           present. In that case, g is calculated as g = Dm * alpha /
           (Dp*(1-alpha)) (optional, ignored if g is given, set to 1/2 if both
@@ -144,73 +149,18 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
     Applied Probability 40.3 (2003): 557-580.
 
     """
-    from scipy.optimize import newton_krylov
+    p = OrderedDict([
+        ('r', [-par['mu'], par['r']]),
+        ('K', [np.Inf, par['K']]),
+        ('D', [par['Dm'], par['Dp']]),
+        ('left', par['lft']),
+        ('right', par['right']),
+        ('top', par['top']),
+        ('bottom', par['bottom'])
+        ])
 
-    if 'g' not in par.keys():
-        if 'alpha' not in par.keys():
-            par['alpha'] = 0.5
-        par['g'] = par['Dm']/par['Dp'] * par['alpha'] / (1-par['alpha'])
-
-    # not a good idea
-    #(r, K, mu, Dp, Dm, g, (al, bl, cl), (ar, br, cr), (at, bt, ct), (ab, bb,
-    #    cb)) = par.values()
-    (al, bl, cl) = par['left']
-    (ar, br, cr) = par['right']
-    (at, bt, ct) = par['top']
-    (ab, bb, cb) = par['bottom']
-
-    lin_term = par['r'] * landscape - par['mu'] * (1-landscape)
-    sec_term = - landscape * par['r'] / par['K']
-    D = landscape * par['Dp'] + (1-landscape) * par['Dm']
-
-    Bxpm, Bxmp, Bypm, Bymp = find_interfaces(landscape)
-    factor_pp = -1. + 2. * par['Dp']/(par['Dp']+par['Dm']/par['g'])
-    factor_pm = -1. + 2. * par['Dm']/(par['Dp']+par['Dm']/par['g'])
-    factor_mp = -1. + 2. * par['Dp']/(par['Dp']*par['g']+par['Dm'])
-    factor_mm = -1. + 2. * par['Dm']/(par['Dp']*par['g']+par['Dm'])
-
-    def residual(P):
-        if force_positive:
-            P = np.abs(P)
-        d2x = np.zeros_like(P)
-        d2y = np.zeros_like(P)
-
-        d2x[1:-1,:] = P[2:,:] - 2*P[1:-1,:] + P[:-2,:]
-        # external boundaries
-        d2x[0,:] = P[1,:] - 2*P[0,:] + (-cl - al/dx * P[0,:])/(bl - al/dx)
-        d2x[-1,:] = P[-2,:] - 2*P[-1,:] + (-cr + ar/dx * P[-1,:])/(br + ar/dx)
-        # interface conditions
-        d2x[:-1,:] += Bxpm * (P[:-1,:] * factor_pp + P[1:,:] * factor_pm) + \
-                Bxmp * (P[:-1,:] * factor_mm + P[1:,:] * factor_mp)
-        d2x[1:,:] += Bxpm * (P[:-1,:] * factor_mp + P[1:,:] * factor_mm) + \
-                Bxmp * (P[:-1,:] * factor_pm + P[1:,:] * factor_pp)
-        d2x[:-1,:] *= (Bxpm+Bxmp)*1./3. + Bxpm*Bxmp/3. + np.ones(Bxpm.shape)
-        # can Bxpm*Bxmp be non-zero??
-
-        d2y[:,1:-1] = P[:,2:] - 2*P[:,1:-1] + P[:,:-2]
-        # external boundaries
-        d2y[:,0] = P[:,1] - 2*P[:,0] + (-cb - ab/dx * P[:,0])/(bb - ab/dx)
-        d2y[:,-1] = P[:,-2] - 2*P[:,-1] + (-ct + at/dx * P[:,-1])/(bt + at/dx)
-        # interface conditions
-        d2y[:,:-1] += Bypm * (P[:,:-1] * factor_pp + P[:,1:] * factor_pm) + \
-                Bymp * (P[:,:-1] * factor_mm + P[:,1:] * factor_mp)
-        d2y[:,1:] += Bypm * (P[:,:-1] * factor_mp + P[:,1:] * factor_mm) + \
-                Bymp * (P[:,:-1] * factor_pm + P[:,1:] * factor_pp)
-        d2y[:,:-1] *= (Bypm+Bymp)*1./3. + Bypm*Bymp/3. + np.ones(Bypm.shape)
-
-        return D*(d2x + d2y)/dx/dx + lin_term*P + sec_term*P**2
-
-    # solve
-    guess = par['K'] * np.ones_like(landscape)
-    sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
-    if force_positive:
-        sol = np.abs(sol)
-    if verbose:
-        print('Residual: %e' % abs(residual(sol)).max())
-        print('max. pop.: %f' % sol.max())
-        print('min. pop.: %f' % sol.min())
-
-    return sol
+    return solve_landscape_ntypes(landscape, p, dx, f_tol, force_positive,
+                                  verbose)
 
 
 def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
@@ -369,61 +319,73 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     Bx, By = find_interfaces_ntypes(landscape)
     factor = {}
     for i, j in iproduct(n, repeat=2):
-        if i > j:
+        if i != j:
             factor[(i,j)] = (
-                -1. + 2. * p['D'][i]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
-                -1. + 2. * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
-                -1. + 2. * p['D'][i]/(p['D'][i]*p['g'][(i,j)]+p['D'][j]),
-                -1. + 2. * p['D'][j]/(p['D'][i]*p['g'][(i,j)]+p['D'][j])
+                # coefficient of term u(x) in u_xx(x)
+                -2. + 8./3 * p['D'][i]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
+                # coefficient of term u(x+h) in u_xx(x)
+                -1. + 8./3 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)])
                 )
+
+    Bxleft = np.zeros_like(landscape)
+    Bxcenter = np.zeros_like(landscape)
+    Bxright = np.zeros_like(landscape)
+    Byleft = np.zeros_like(landscape)
+    Bycenter = np.zeros_like(landscape)
+    Byright = np.zeros_like(landscape)
+    for (i,j), fac in factor.items():
+        ## direction x
+        # patch type i
+        Bxcenter[Bx[i,j]] += factor[i,j][0]
+        Bxleft[shifted_index(Bx[i,j], 0, -1)] += 1./3
+        Bxright[shifted_index(Bx[i,j], 0, 1)] += factor[i,j][1]
+        # patch type j
+        Bxcenter[shifted_index(Bx[i,j], 0, 1)] += factor[j,i][0]
+        Bxleft[Bx[i,j]] += factor[j,i][1]
+        Bxright[shifted_index(Bx[i,j], 0, 2)] += 1./3
+        ## direction y
+        # patch type i
+        Bycenter[By[i,j]] += factor[i,j][0]
+        Byleft[shifted_index(By[i,j], 1, -1)] += 1./3
+        Byright[shifted_index(By[i,j], 1, 1)] += factor[i,j][1]
+        # patch type j
+        Bycenter[shifted_index(By[i,j], 1, 1)] += factor[j,i][0]
+        Byleft[By[i,j]] += factor[j,i][1]
+        Byright[shifted_index(By[i,j], 1, 2)] += 1./3
 
     def residual(P):
         if force_positive:
             P = np.abs(P)
-        d2x = np.zeros_like(P)
-        d2y = np.zeros_like(P)
 
+        d2x = np.zeros_like(P)
         d2x[1:-1,:] = P[2:,:] - 2*P[1:-1,:] + P[:-2,:]
         # external boundaries
         d2x[0,:] = P[1,:] - 2*P[0,:] + (-cl - al/dx * P[0,:])/(bl - al/dx)
         d2x[-1,:] = P[-2,:] - 2*P[-1,:] + (-cr + ar/dx * P[-1,:])/(br + ar/dx)
         # interface conditions
-        # TODO: probably something wrong here
-        for (i,j), fac in factor.items():
-            d2x[:-1,:][Bx[(i,j)]] += (P[:-1,:] * factor[(i,j)][0] + \
-                    P[1:,:] * factor[(i,j)][1])[Bx[(i,j)]]
-            d2x[:-1,:][Bx[(j,i)]] += (P[:-1,:] * factor[(i,j)][3] + \
-                    P[1:,:] * factor[(i,j)][2])[Bx[(j,i)]]
-            d2x[1:,:][Bx[(i,j)]] += (P[:-1,:] * factor[(i,j)][2] + \
-                    P[1:,:] * factor[(i,j)][3])[Bx[(i,j)]]
-            d2x[1:,:][Bx[(j,i)]] += (P[:-1,:] * factor[(i,j)][1] + \
-                    P[1:,:] * factor[(i,j)][0])[Bx[(j,i)]]
-            d2x[:-1,:][Bx[(i,j)]] *= 4/3 
-            d2x[:-1,:][Bx[(j,i)]] *= 4/3 
-            # assuming Bxpm*Bxmp is always zero (how could it not be??)
+        d2x[1:-1,:] += (
+                Bxcenter[1:-1,:] * P[1:-1,:] +
+                Bxleft[:-2,:] * P[:-2,:] +
+                Bxright[2:,:] * P[2:,:]
+                )
 
+        d2y = np.zeros_like(P)
         d2y[:,1:-1] = P[:,2:] - 2*P[:,1:-1] + P[:,:-2]
         # external boundaries
         d2y[:,0] = P[:,1] - 2*P[:,0] + (-cb - ab/dx * P[:,0])/(bb - ab/dx)
         d2y[:,-1] = P[:,-2] - 2*P[:,-1] + (-ct + at/dx * P[:,-1])/(bt + at/dx)
         # interface conditions
-        for (i,j), fac in factor.items():
-            d2y[:-1,:][By[(i,j)]] += (P[:-1,:] * factor[(i,j)][0] + \
-                    P[1:,:] * factor[(i,j)][1])[By[(i,j)]]
-            d2y[:-1,:][By[(j,i)]] += (P[:-1,:] * factor[(i,j)][3] + \
-                    P[1:,:] * factor[(i,j)][2])[By[(j,i)]]
-            d2y[1:,:][By[(i,j)]] += (P[:-1,:] * factor[(i,j)][2] + \
-                    P[1:,:] * factor[(i,j)][3])[By[(i,j)]]
-            d2y[1:,:][By[(j,i)]] += (P[:-1,:] * factor[(i,j)][1] + \
-                    P[1:,:] * factor[(i,j)][0])[By[(j,i)]]
-            d2y[:-1,:][By[(i,j)]] *= 4/3 
-            d2y[:-1,:][By[(j,i)]] *= 4/3 
+        d2y[:,1:-1] += (
+                Bycenter[:,1:-1] * P[:,1:-1] +
+                Byleft[:,:-2] * P[:,:-2] +
+                Byright[:,2:] * P[:,2:]
+                )
 
         return D*(d2x + d2y)/dx/dx + r*P + c*P**2
 
     # solve
     guess = r.copy()
-    guess[guess<=0] = 0
+    guess[guess<=0] = 1e-6
     guess[guess>0] = 1/((-c/r)[guess>0])
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
     if force_positive:
@@ -434,7 +396,6 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         print('min. pop.: %f' % sol.min())
 
     return sol
-
 
 def find_interfaces(landscape):
     '''Helper function that marks where are the internal boundaries.'''
@@ -475,6 +436,34 @@ def find_interfaces_ntypes(landscape):
             By[(i,j)] = np.where(Ay == 2**i - 2**j)
 
     return Bx, By
+
+def shifted_index(x, index, shift):
+    """Shifts the indices of elements from an array.
+
+    Helper function to deal with indices returned by `np.where()`.
+
+    Parameters
+    ----------
+    x : tuple of arrays
+    index : integer
+        Position of the shifted array in th tuple
+    shift : integer
+        Value by which to shift the array
+
+    Returns
+    -------
+    out : tuple of shifted arrays (same shape as input)
+
+    Notes
+    -----
+    This function doesn't affect the original arrays, it makes a copy, modifies
+    and then returns it. For that reason, it's not very efficient.
+
+    """
+    import copy
+    newx = copy.deepcopy(list(x))
+    newx[index] += shift
+    return tuple(newx)
 
 def solve_multiple_parameters(variables, values, landscape, par, dx,
         f_tol=None, force_positive=False, verbose=True, multiprocess=True):
