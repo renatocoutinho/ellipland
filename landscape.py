@@ -53,9 +53,10 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
         u_t(x) &= D_p \nabla^2 u(x) + ru(1-u(x)/K) = 0 \text{ in a patch} \\
         v_t(x) &= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{ in the matrix}
 
-    .. rubric:: Note
-        This function preserves the original interface, but internally it calls
-        the newer `solve_landscape_ntypes()`.
+    Notes
+    -----
+    This function preserves the original interface, but internally it calls the
+    newer `solve_landscape_ntypes()`.
 
 
     Parameters
@@ -153,7 +154,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
         ('r', [-par['mu'], par['r']]),
         ('K', [np.Inf, par['K']]),
         ('D', [par['Dm'], par['Dp']]),
-        ('left', par['lft']),
+        ('left', par['left']),
         ('right', par['right']),
         ('top', par['top']),
         ('bottom', par['bottom'])

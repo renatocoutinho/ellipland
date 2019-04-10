@@ -89,9 +89,10 @@
 <span class="sd">        u_t(x) &amp;= D_p \nabla^2 u(x) + ru(1-u(x)/K) = 0 \text{ in a patch} \\</span>
 <span class="sd">        v_t(x) &amp;= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{ in the matrix}</span>
 
-<span class="sd">    .. rubric:: Note</span>
-<span class="sd">        This function preserves the original interface, but internally it calls</span>
-<span class="sd">        the newer `solve_landscape_ntypes()`.</span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function preserves the original interface, but internally it calls the</span>
+<span class="sd">    newer `solve_landscape_ntypes()`.</span>
 
 
 <span class="sd">    Parameters</span>
@@ -189,7 +190,7 @@
         <span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">],</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]]),</span>
         <span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">Inf</span><span class="p">,</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">]]),</span>
         <span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">],</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">]]),</span>
-        <span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;lft&#39;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]),</span>
         <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]),</span>
         <span class="p">(</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]),</span>
         <span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">])</span>
