@@ -191,6 +191,32 @@ Population Extinction, The Journal of Wildlife Management, Vol. 61, No. 3
 </dd></dl>
 
 <dl class="function">
+<dt id="landscape.shifted_index">
+<code class="descclassname">landscape.</code><code class="descname">shifted_index</code><span class="sig-paren">(</span><em>x</em>, <em>index</em>, <em>shift</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#shifted_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.shifted_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shifts the indices of elements from an array.</p>
+<p>Helper function to deal with indices returned by <cite>np.where()</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tuple of arrays</em>) – </li>
+<li><strong>index</strong> (<em>integer</em>) – Position of the shifted array in th tuple</li>
+<li><strong>shift</strong> (<em>integer</em>) – Value by which to shift the array</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>out</strong> (<em>tuple of shifted arrays (same shape as input)</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This function doesn’t affect the original arrays, it makes a copy, modifies
+and then returns it. For that reason, it’s not very efficient.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="landscape.solve_landscape">
 <code class="descclassname">landscape.</code><code class="descname">solve_landscape</code><span class="sig-paren">(</span><em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>force_positive=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_landscape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the stationary solution for a given landscape and set of parameters.</p>
@@ -200,6 +226,9 @@ system of equations in 2 dimensions (x is a 2-d vector):</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}u_t(x) &amp;= D_p \nabla^2 u(x) + ru(1-u(x)/K) = 0 \text{ in a patch} \\
 v_t(x) &amp;= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{ in the matrix}\end{split}\]</div>
+<p class="rubric">Note
+This function preserves the original interface, but internally it calls
+the newer <cite>solve_landscape_ntypes()</cite>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -214,7 +243,7 @@ v_t(x) &amp;= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{ in the matrix}\end{split}\
 <li>Dp : diffusivity on patches</li>
 <li>Dm : diffusivity in the matrix</li>
 <li>g : habitat discontinuity parameter gamma. See interface conditions
-below (optional, determined from Dp, Dm and alpha if absnt)</li>
+below (optional, determined from Dp, Dm and alpha if absent)</li>
 <li>alpha : habitat preference, only taken into account if g is not
 present. In that case, g is calculated as g = Dm * alpha /
 (Dp*(1-alpha)) (optional, ignored if g is given, set to 1/2 if both
