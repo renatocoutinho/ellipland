@@ -269,7 +269,7 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     >>> parn = OrderedDict([
         ('r', [-0.03, 0.1]),
         ('K', [np.Inf, 1.0]),
-        ('D', [0.001, 0.0001]),
+        ('D', [0.0001, 0.001]),
         ('left', [1.0, 0.0, 0.0]),
         ('right', [1.0, 0.0, 0.0]),
         ('top', [1.0, 0.0, 0.0]),
@@ -308,9 +308,9 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     (at, bt, ct) = p['top']
     (ab, bb, cb) = p['bottom']
 
-    D = np.zeros_like(landscape)
-    r = np.zeros_like(landscape)
-    c = np.zeros_like(landscape)
+    D = np.zeros_like(landscape, dtype=np.float_)
+    r = np.zeros_like(landscape, dtype=np.float_)
+    c = np.zeros_like(landscape, dtype=np.float_)
     for i in n:
         li = np.where(landscape == i)
         D[li] = p['D'][i]
@@ -328,12 +328,12 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
                 -1. + 8./3 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)])
                 )
 
-    Bxleft = np.zeros_like(landscape)
-    Bxcenter = np.zeros_like(landscape)
-    Bxright = np.zeros_like(landscape)
-    Byleft = np.zeros_like(landscape)
-    Bycenter = np.zeros_like(landscape)
-    Byright = np.zeros_like(landscape)
+    Bxleft = np.zeros_like(landscape, dtype=np.float_)
+    Bxcenter = np.zeros_like(landscape, dtype=np.float_)
+    Bxright = np.zeros_like(landscape, dtype=np.float_)
+    Byleft = np.zeros_like(landscape, dtype=np.float_)
+    Bycenter = np.zeros_like(landscape, dtype=np.float_)
+    Byright = np.zeros_like(landscape, dtype=np.float_)
     for (i,j), fac in factor.items():
         ## direction x
         # patch type i
@@ -386,8 +386,8 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
 
     # solve
     guess = r.copy()
-    guess[guess<=0] = 1e-6
     guess[guess>0] = 1/((-c/r)[guess>0])
+    guess[guess<=0] = 1e-6
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
     if force_positive:
         sol = np.abs(sol)
