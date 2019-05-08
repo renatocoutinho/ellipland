@@ -433,8 +433,8 @@ def find_interfaces_ntypes(landscape):
     By = {}
     for i, j in iproduct(n, repeat=2):
         if i != j:
-            Bx[(i,j)] = np.where(Ax == 2**i - 2**j)
-            By[(i,j)] = np.where(Ay == 2**i - 2**j)
+            Bx[(i,j)] = np.where(Ax == 2**j - 2**i)
+            By[(i,j)] = np.where(Ay == 2**j - 2**i)
 
     return Bx, By
 
