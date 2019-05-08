@@ -269,7 +269,7 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     >>> parn = OrderedDict([
         ('r', [-0.03, 0.1]),
         ('K', [np.Inf, 1.0]),
-        ('D', [0.0001, 0.001]),
+        ('D', [0.001, 0.0001]),
         ('left', [1.0, 0.0, 0.0]),
         ('right', [1.0, 0.0, 0.0]),
         ('top', [1.0, 0.0, 0.0]),
@@ -334,7 +334,7 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     Byleft = np.zeros_like(landscape, dtype=np.float_)
     Bycenter = np.zeros_like(landscape, dtype=np.float_)
     Byright = np.zeros_like(landscape, dtype=np.float_)
-    for (i,j), fac in factor.items():
+    for i,j in factor.keys():
         ## direction x
         # patch type i
         Bxcenter[Bx[i,j]] += factor[i,j][0]
