@@ -19,7 +19,7 @@ landscape <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, verbose=TR
     # loads python library
     source_python('landscape.py')
     # loads landscape file
-    l <- np.loadtxt(land)
+    l <- np$loadtxt(land)
     # converts parameters to OrderedDict
     pars  <- OrderedDict(p)
     # actually runs the solver
@@ -45,7 +45,7 @@ landscape_ntypes <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, ver
     # loads python library
     source_python('landscape.py')
     # loads landscape file
-    l <- np.loadtxt(land)
+    l <- np$loadtxt(land)
     # converts parameters to OrderedDict
     pars  <- OrderedDict(p)
     # actually runs the solver
