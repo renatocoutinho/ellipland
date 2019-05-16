@@ -1,3 +1,6 @@
+library(reticulate)
+np <- import("numpy")
+
 landscape <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, verbose=TRUE){
     # single-species, habitat/matrix only
     #
@@ -15,7 +18,6 @@ landscape <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, verbose=TR
     #         )
     # sol <- landscape('landA.txt', p, 0.1)
 
-    library(reticulate)
     # loads python library
     source_python('landscape.py')
     # loads landscape file
@@ -41,7 +43,6 @@ landscape_ntypes <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, ver
     #         )
     # sol <- landscape_ntypes('landA.txt', p, 0.1)
 
-    library(reticulate)
     # loads python library
     source_python('landscape.py')
     # loads landscape file
