@@ -1,5 +1,6 @@
 landscape <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, verbose=TRUE){
     # single-species, habitat/matrix only
+    #
     # example:
     # p <- list(
     #         list('r', 0.1),
@@ -18,7 +19,7 @@ landscape <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, verbose=TR
     # loads python library
     source_python('landscape.py')
     # loads landscape file
-    l <- loadtxt(land)
+    l <- np.loadtxt(land)
     # converts parameters to OrderedDict
     pars  <- OrderedDict(p)
     # actually runs the solver
@@ -27,6 +28,7 @@ landscape <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, verbose=TR
 
 landscape_ntypes <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, verbose=TRUE){
     # single-species, n types of habitat
+    #
     # example with two types of habitat (matrix and patch):
     # p <- list(
     #         list('r', c(-0.03, 0.1)),
@@ -43,7 +45,7 @@ landscape_ntypes <- function (land, p, dx, f_tol=NULL, force_positive=FALSE, ver
     # loads python library
     source_python('landscape.py')
     # loads landscape file
-    l <- loadtxt(land)
+    l <- np.loadtxt(land)
     # converts parameters to OrderedDict
     pars  <- OrderedDict(p)
     # actually runs the solver
