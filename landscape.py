@@ -337,22 +337,26 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     for i,j in factor.keys():
         ## direction x
         # patch type i
+        # (exclude indices at the left border)
         Bxcenter[Bx[i,j]] += factor[i,j][0]
-        Bxleft[shifted_index(Bx[i,j], 0, -1)] += 1./3
+        Bxleft[shifted_index(Bx[i,j], 0, -1, minimum=0)] += 1./3
         Bxright[shifted_index(Bx[i,j], 0, 1)] += factor[i,j][1]
         # patch type j
+        # (exclude indices at the right border)
         Bxcenter[shifted_index(Bx[i,j], 0, 1)] += factor[j,i][0]
         Bxleft[Bx[i,j]] += factor[j,i][1]
-        Bxright[shifted_index(Bx[i,j], 0, 2)] += 1./3
+        Bxright[shifted_index(Bx[i,j], 0, 2, maximum=Bxright.shape[0]-1)] += 1./3
         ## direction y
         # patch type i
+        # (exclude indices at the bottom border)
         Bycenter[By[i,j]] += factor[i,j][0]
-        Byleft[shifted_index(By[i,j], 1, -1)] += 1./3
+        Byleft[shifted_index(By[i,j], 1, -1, minimum=0)] += 1./3
         Byright[shifted_index(By[i,j], 1, 1)] += factor[i,j][1]
         # patch type j
+        # (exclude indices at the top border)
         Bycenter[shifted_index(By[i,j], 1, 1)] += factor[j,i][0]
         Byleft[By[i,j]] += factor[j,i][1]
-        Byright[shifted_index(By[i,j], 1, 2)] += 1./3
+        Byright[shifted_index(By[i,j], 1, 2, maximum=Byright.shape[1]-1)] += 1./3
 
     def residual(P):
         if force_positive:
@@ -438,7 +442,8 @@ def find_interfaces_ntypes(landscape):
 
     return Bx, By
 
-def shifted_index(x, index, shift):
+def shifted_index(x, index, shift, minimum=np.iinfo(np.int_).min,
+        maximum=np.iinfo(np.int_).max):
     """Shifts the indices of elements from an array.
 
     Helper function to deal with indices returned by `np.where()`.
@@ -450,6 +455,9 @@ def shifted_index(x, index, shift):
         Position of the shifted array in th tuple
     shift : integer
         Value by which to shift the array
+    minimum : integer
+    maximum : integer
+        Minimum and maximum values of new indices
 
     Returns
     -------
@@ -464,6 +472,9 @@ def shifted_index(x, index, shift):
     import copy
     newx = copy.deepcopy(list(x))
     newx[index] += shift
+    mask = np.logical_and(newx[index] >= minimum, newx[index] <= maximum)
+    newx[0] = newx[0][mask]
+    newx[1] = newx[1][mask]
     return tuple(newx)
 
 def solve_multiple_parameters(variables, values, landscape, par, dx,
