@@ -609,6 +609,16 @@ def refine_grid(landscape, n=2):
     '''Increase the resolution of a landscape grid by a factor of n.'''
     return np.repeat(np.repeat(landscape, n, axis=1), n, axis=0)
 
+def coarse_grid(landscape):
+    '''Decrease resolution of a grid by a factor of 2.
+
+    Each square of 2 by 2 pixels is replaced by a single pixel with its average
+    value.
+
+    '''
+    a = (landscape[::2,:] + landscape[1::2,:]) / 2
+    return (a[:,::2] + a[:,1::2]) / 2
+
 def image_to_landscape(image):
     '''Converts an image (in any RGB format) to a 2d array of ones and zeroes.
 
