@@ -165,7 +165,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
 
 
 def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
-        force_positive=False, verbose=True):
+        force_positive=False, verbose=True, debug=False):
     r"""Find the stationary solution for a landscape with many types of habitat.
 
     Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
@@ -328,45 +328,46 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
                 -1. + 8./3 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)])
                 )
 
-    Bxleft = np.zeros_like(landscape, dtype=np.float_)
-    Bxcenter = np.zeros_like(landscape, dtype=np.float_)
-    Bxright = np.zeros_like(landscape, dtype=np.float_)
-    Byleft = np.zeros_like(landscape, dtype=np.float_)
-    Bycenter = np.zeros_like(landscape, dtype=np.float_)
-    Byright = np.zeros_like(landscape, dtype=np.float_)
+    shapewb = (landscape.shape[0]+2, landscape.shape[1]+2)
+    Bxleft = np.zeros(shapewb, dtype=np.float_)
+    Bxcenter = np.zeros(shapewb, dtype=np.float_)
+    Bxright = np.zeros(shapewb, dtype=np.float_)
+    Byleft = np.zeros(shapewb, dtype=np.float_)
+    Bycenter = np.zeros(shapewb, dtype=np.float_)
+    Byright = np.zeros(shapewb, dtype=np.float_)
     for i,j in factor.keys():
         ## direction x
         # patch type i
-        # (exclude indices at the left border)
-        Bxcenter[Bx[i,j]] += factor[i,j][0]
-        Bxleft[shifted_index(Bx[i,j], 0, -1, minimum=0)] += 1./3
-        Bxright[shifted_index(Bx[i,j], 0, 1)] += factor[i,j][1]
+        Bxcenter[:,1:-1][shifted_index(Bx[i,j], 0, 1)] += factor[i,j][0]
+        Bxleft[:,1:-1][shifted_index(Bx[i,j], 0, 0)] += 1./3
+        Bxright[:,1:-1][shifted_index(Bx[i,j], 0, 2)] += factor[i,j][1]
         # patch type j
-        # (exclude indices at the right border)
-        Bxcenter[shifted_index(Bx[i,j], 0, 1)] += factor[j,i][0]
-        Bxleft[Bx[i,j]] += factor[j,i][1]
-        Bxright[shifted_index(Bx[i,j], 0, 2, maximum=Bxright.shape[0]-1)] += 1./3
+        Bxcenter[:,1:-1][shifted_index(Bx[i,j], 0, 2)] += factor[j,i][0]
+        Bxleft[:,1:-1][shifted_index(Bx[i,j], 0, 1)] += factor[j,i][1]
+        Bxright[:,1:-1][shifted_index(Bx[i,j], 0, 3)] += 1./3
         ## direction y
         # patch type i
-        # (exclude indices at the bottom border)
-        Bycenter[By[i,j]] += factor[i,j][0]
-        Byleft[shifted_index(By[i,j], 1, -1, minimum=0)] += 1./3
-        Byright[shifted_index(By[i,j], 1, 1)] += factor[i,j][1]
+        Bycenter[1:-1,:][shifted_index(By[i,j], 1, 1)] += factor[i,j][0]
+        Byleft[1:-1,:][shifted_index(By[i,j], 1, 0)] += 1./3
+        Byright[1:-1,:][shifted_index(By[i,j], 1, 2)] += factor[i,j][1]
         # patch type j
-        # (exclude indices at the top border)
-        Bycenter[shifted_index(By[i,j], 1, 1)] += factor[j,i][0]
-        Byleft[By[i,j]] += factor[j,i][1]
-        Byright[shifted_index(By[i,j], 1, 2, maximum=Byright.shape[1]-1)] += 1./3
+        Bycenter[1:-1,:][shifted_index(By[i,j], 1, 2)] += factor[j,i][0]
+        Byleft[1:-1,:][shifted_index(By[i,j], 1, 1)] += factor[j,i][1]
+        Byright[1:-1,:][shifted_index(By[i,j], 1, 3)] += 1./3
 
     def residual(P):
         if force_positive:
             P = np.abs(P)
 
+        P = np.pad(P, 1, 'constant')
+        # external boundaries
+        P[0,:] = (-cl - al/dx * P[0,:])/(bl - al/dx)
+        P[-1,:] = (-cr + ar/dx * P[-1,:])/(br + ar/dx)
+        P[:,0] = (-cb - ab/dx * P[:,0])/(bb - ab/dx)
+        P[:,-1] = (-ct + at/dx * P[:,-1])/(bt + at/dx)
+
         d2x = np.zeros_like(P)
         d2x[1:-1,:] = P[2:,:] - 2*P[1:-1,:] + P[:-2,:]
-        # external boundaries
-        d2x[0,:] = P[1,:] - 2*P[0,:] + (-cl - al/dx * P[0,:])/(bl - al/dx)
-        d2x[-1,:] = P[-2,:] - 2*P[-1,:] + (-cr + ar/dx * P[-1,:])/(br + ar/dx)
         # interface conditions
         d2x[1:-1,:] += (
                 Bxcenter[1:-1,:] * P[1:-1,:] +
@@ -376,9 +377,6 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
 
         d2y = np.zeros_like(P)
         d2y[:,1:-1] = P[:,2:] - 2*P[:,1:-1] + P[:,:-2]
-        # external boundaries
-        d2y[:,0] = P[:,1] - 2*P[:,0] + (-cb - ab/dx * P[:,0])/(bb - ab/dx)
-        d2y[:,-1] = P[:,-2] - 2*P[:,-1] + (-ct + at/dx * P[:,-1])/(bt + at/dx)
         # interface conditions
         d2y[:,1:-1] += (
                 Bycenter[:,1:-1] * P[:,1:-1] +
@@ -386,13 +384,19 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
                 Byright[:,2:] * P[:,2:]
                 )
 
-        return D*(d2x + d2y)/dx/dx + r*P + c*P**2
+        return D*(d2x[1:-1,1:-1] + d2y[1:-1,1:-1])/dx/dx + r*P[1:-1,1:-1] \
+                + c*P[1:-1,1:-1]**2
 
     # solve
     guess = r.copy()
     guess[guess>0] = 1/((-c/r)[guess>0])
     guess[guess<=0] = 1e-6
+
+    if debug:
+        return guess, residual
+
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
+
     if force_positive:
         sol = np.abs(sol)
     if verbose:
