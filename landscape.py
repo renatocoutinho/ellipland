@@ -317,15 +317,21 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         r[li] = p['r'][i]
         c[li] = - p['r'][i] / p['K'][i]
 
-    Bx, By = find_interfaces_ntypes(landscape)
+    Bx, By, Tx, Ty = find_interfaces_ntypes(landscape, find_triples=True)
     factor = {}
     for i, j in iproduct(n, repeat=2):
         if i != j:
             factor[(i,j)] = (
+                ## coefficients for simple interface
                 # coefficient of term u(x) in u_xx(x)
                 -2. + 8./3 * p['D'][i]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
                 # coefficient of term u(x+h) in u_xx(x)
-                -1. + 8./3 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)])
+                -1. + 8./3 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
+                ## coefficients for interface on both sides (single pixel width)
+                # coefficient of term u(x) in u_xx(x)
+                4 * p['D'][i]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
+                # coefficient of term u(x+h) in u_xx(x)
+                -1 + 4 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)])
                 )
 
     shapewb = (landscape.shape[0]+2, landscape.shape[1]+2)
@@ -335,6 +341,7 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     Byleft = np.zeros(shapewb, dtype=np.float_)
     Bycenter = np.zeros(shapewb, dtype=np.float_)
     Byright = np.zeros(shapewb, dtype=np.float_)
+    ## simple interfaces
     for i,j in factor.keys():
         ## direction x
         # patch type i
@@ -354,6 +361,17 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         Bycenter[1:-1,:][shifted_index(By[i,j], 1, 2)] += factor[j,i][0]
         Byleft[1:-1,:][shifted_index(By[i,j], 1, 1)] += factor[j,i][1]
         Byright[1:-1,:][shifted_index(By[i,j], 1, 3)] += 1./3
+    ## contiguous interfaces
+    for x,y in zip(*Tx):
+        Bxcenter[1:-1,1:-1][x, y] = factor[landscape[x,y],landscape[x-1,y]][2] \
+                                  + factor[landscape[x,y],landscape[x+1,y]][2]
+        Bxleft[1:-1,1:-1][x-1, y] = factor[landscape[x,y],landscape[x-1,y]][3]
+        Bxright[1:-1,1:-1][x+1, y] = factor[landscape[x,y],landscape[x+1,y]][3]
+    for x,y in zip(*Ty):
+        Bycenter[1:-1,1:-1][x, y] = factor[landscape[x,y],landscape[x,y-1]][2] \
+                                  + factor[landscape[x,y],landscape[x,y+1]][2]
+        Byleft[1:-1,1:-1][x, y-1] = factor[landscape[x,y],landscape[x,y-1]][3]
+        Byright[1:-1,1:-1][x, y+1] = factor[landscape[x,y],landscape[x,y+1]][3]
 
     def residual(P):
         if force_positive:
@@ -418,7 +436,7 @@ def find_interfaces(landscape):
     Bymp = (-By + 1)//2
     return Bxpm, Bxmp, Bypm, Bymp
 
-def find_interfaces_ntypes(landscape):
+def find_interfaces_ntypes(landscape, find_triples=False):
     '''Determines internal boundaries for landscapes with many habitat types.
 
     Parameters
@@ -443,6 +461,11 @@ def find_interfaces_ntypes(landscape):
         if i != j:
             Bx[(i,j)] = np.where(Ax == 2**j - 2**i)
             By[(i,j)] = np.where(Ay == 2**j - 2**i)
+
+    if find_triples:
+        Tx = shifted_index(np.where(np.logical_and(Ax[1:,:], Ax[:-1,:])), 0, 1)
+        Ty = shifted_index(np.where(np.logical_and(Ay[:,1:], Ay[:,:-1])), 1, 1)
+        return Bx, By, Tx, Ty
 
     return Bx, By
 
@@ -475,7 +498,11 @@ def shifted_index(x, index, shift, minimum=np.iinfo(np.int_).min,
     """
     import copy
     newx = copy.deepcopy(list(x))
-    newx[index] += shift
+    try:
+        newx[index] += shift
+    except TypeError:
+        newx = np.array(newx)
+        newx[index] += shift
     mask = np.logical_and(newx[index] >= minimum, newx[index] <= maximum)
     newx[0] = newx[0][mask]
     newx[1] = newx[1][mask]
