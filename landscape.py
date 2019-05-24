@@ -165,7 +165,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
 
 
 def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
-        force_positive=False, verbose=True, debug=False):
+        force_positive=False, verbose=True):
     r"""Find the stationary solution for a landscape with many types of habitat.
 
     Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
@@ -317,75 +317,52 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         r[li] = p['r'][i]
         c[li] = - p['r'][i] / p['K'][i]
 
-    Bx, By, Tx, Ty = find_interfaces_ntypes(landscape, find_triples=True)
+    Bx, By = find_interfaces_ntypes(landscape)
     factor = {}
     for i, j in iproduct(n, repeat=2):
         if i != j:
             factor[(i,j)] = (
-                ## coefficients for simple interface
                 # coefficient of term u(x) in u_xx(x)
                 -2. + 8./3 * p['D'][i]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
                 # coefficient of term u(x+h) in u_xx(x)
-                -1. + 8./3 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
-                ## coefficients for interface on both sides (single pixel width)
-                # coefficient of term u(x) in u_xx(x)
-                4 * p['D'][i]/(p['D'][i]+p['D'][j]/p['g'][(i,j)]),
-                # coefficient of term u(x+h) in u_xx(x)
-                -1 + 4 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)])
+                -1. + 8./3 * p['D'][j]/(p['D'][i]+p['D'][j]/p['g'][(i,j)])
                 )
 
-    shapewb = (landscape.shape[0]+2, landscape.shape[1]+2)
-    Bxleft = np.zeros(shapewb, dtype=np.float_)
-    Bxcenter = np.zeros(shapewb, dtype=np.float_)
-    Bxright = np.zeros(shapewb, dtype=np.float_)
-    Byleft = np.zeros(shapewb, dtype=np.float_)
-    Bycenter = np.zeros(shapewb, dtype=np.float_)
-    Byright = np.zeros(shapewb, dtype=np.float_)
-    ## simple interfaces
+    Bxleft = np.zeros_like(landscape, dtype=np.float_)
+    Bxcenter = np.zeros_like(landscape, dtype=np.float_)
+    Bxright = np.zeros_like(landscape, dtype=np.float_)
+    Byleft = np.zeros_like(landscape, dtype=np.float_)
+    Bycenter = np.zeros_like(landscape, dtype=np.float_)
+    Byright = np.zeros_like(landscape, dtype=np.float_)
     for i,j in factor.keys():
         ## direction x
         # patch type i
-        Bxcenter[:,1:-1][shifted_index(Bx[i,j], 0, 1)] += factor[i,j][0]
-        Bxleft[:,1:-1][shifted_index(Bx[i,j], 0, 0)] += 1./3
-        Bxright[:,1:-1][shifted_index(Bx[i,j], 0, 2)] += factor[i,j][1]
+        Bxcenter[Bx[i,j]] += factor[i,j][0]
+        Bxleft[shifted_index(Bx[i,j], 0, -1)] += 1./3
+        Bxright[shifted_index(Bx[i,j], 0, 1)] += factor[i,j][1]
         # patch type j
-        Bxcenter[:,1:-1][shifted_index(Bx[i,j], 0, 2)] += factor[j,i][0]
-        Bxleft[:,1:-1][shifted_index(Bx[i,j], 0, 1)] += factor[j,i][1]
-        Bxright[:,1:-1][shifted_index(Bx[i,j], 0, 3)] += 1./3
+        Bxcenter[shifted_index(Bx[i,j], 0, 1)] += factor[j,i][0]
+        Bxleft[Bx[i,j]] += factor[j,i][1]
+        Bxright[shifted_index(Bx[i,j], 0, 2)] += 1./3
         ## direction y
         # patch type i
-        Bycenter[1:-1,:][shifted_index(By[i,j], 1, 1)] += factor[i,j][0]
-        Byleft[1:-1,:][shifted_index(By[i,j], 1, 0)] += 1./3
-        Byright[1:-1,:][shifted_index(By[i,j], 1, 2)] += factor[i,j][1]
+        Bycenter[By[i,j]] += factor[i,j][0]
+        Byleft[shifted_index(By[i,j], 1, -1)] += 1./3
+        Byright[shifted_index(By[i,j], 1, 1)] += factor[i,j][1]
         # patch type j
-        Bycenter[1:-1,:][shifted_index(By[i,j], 1, 2)] += factor[j,i][0]
-        Byleft[1:-1,:][shifted_index(By[i,j], 1, 1)] += factor[j,i][1]
-        Byright[1:-1,:][shifted_index(By[i,j], 1, 3)] += 1./3
-    ## contiguous interfaces
-    for x,y in zip(*Tx):
-        Bxcenter[1:-1,1:-1][x, y] = factor[landscape[x,y],landscape[x-1,y]][2] \
-                                  + factor[landscape[x,y],landscape[x+1,y]][2]
-        Bxleft[1:-1,1:-1][x-1, y] = factor[landscape[x,y],landscape[x-1,y]][3]
-        Bxright[1:-1,1:-1][x+1, y] = factor[landscape[x,y],landscape[x+1,y]][3]
-    for x,y in zip(*Ty):
-        Bycenter[1:-1,1:-1][x, y] = factor[landscape[x,y],landscape[x,y-1]][2] \
-                                  + factor[landscape[x,y],landscape[x,y+1]][2]
-        Byleft[1:-1,1:-1][x, y-1] = factor[landscape[x,y],landscape[x,y-1]][3]
-        Byright[1:-1,1:-1][x, y+1] = factor[landscape[x,y],landscape[x,y+1]][3]
+        Bycenter[shifted_index(By[i,j], 1, 1)] += factor[j,i][0]
+        Byleft[By[i,j]] += factor[j,i][1]
+        Byright[shifted_index(By[i,j], 1, 2)] += 1./3
 
     def residual(P):
         if force_positive:
             P = np.abs(P)
 
-        P = np.pad(P, 1, 'constant')
-        # external boundaries
-        P[0,:] = (-cl - al/dx * P[0,:])/(bl - al/dx)
-        P[-1,:] = (-cr + ar/dx * P[-1,:])/(br + ar/dx)
-        P[:,0] = (-cb - ab/dx * P[:,0])/(bb - ab/dx)
-        P[:,-1] = (-ct + at/dx * P[:,-1])/(bt + at/dx)
-
         d2x = np.zeros_like(P)
         d2x[1:-1,:] = P[2:,:] - 2*P[1:-1,:] + P[:-2,:]
+        # external boundaries
+        d2x[0,:] = P[1,:] - 2*P[0,:] + (-cl - al/dx * P[0,:])/(bl - al/dx)
+        d2x[-1,:] = P[-2,:] - 2*P[-1,:] + (-cr + ar/dx * P[-1,:])/(br + ar/dx)
         # interface conditions
         d2x[1:-1,:] += (
                 Bxcenter[1:-1,:] * P[1:-1,:] +
@@ -395,6 +372,9 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
 
         d2y = np.zeros_like(P)
         d2y[:,1:-1] = P[:,2:] - 2*P[:,1:-1] + P[:,:-2]
+        # external boundaries
+        d2y[:,0] = P[:,1] - 2*P[:,0] + (-cb - ab/dx * P[:,0])/(bb - ab/dx)
+        d2y[:,-1] = P[:,-2] - 2*P[:,-1] + (-ct + at/dx * P[:,-1])/(bt + at/dx)
         # interface conditions
         d2y[:,1:-1] += (
                 Bycenter[:,1:-1] * P[:,1:-1] +
@@ -402,19 +382,13 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
                 Byright[:,2:] * P[:,2:]
                 )
 
-        return D*(d2x[1:-1,1:-1] + d2y[1:-1,1:-1])/dx/dx + r*P[1:-1,1:-1] \
-                + c*P[1:-1,1:-1]**2
+        return D*(d2x + d2y)/dx/dx + r*P + c*P**2
 
     # solve
     guess = r.copy()
     guess[guess>0] = 1/((-c/r)[guess>0])
     guess[guess<=0] = 1e-6
-
-    if debug:
-        return guess, residual
-
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
-
     if force_positive:
         sol = np.abs(sol)
     if verbose:
@@ -436,7 +410,7 @@ def find_interfaces(landscape):
     Bymp = (-By + 1)//2
     return Bxpm, Bxmp, Bypm, Bymp
 
-def find_interfaces_ntypes(landscape, find_triples=False):
+def find_interfaces_ntypes(landscape):
     '''Determines internal boundaries for landscapes with many habitat types.
 
     Parameters
@@ -462,15 +436,9 @@ def find_interfaces_ntypes(landscape, find_triples=False):
             Bx[(i,j)] = np.where(Ax == 2**j - 2**i)
             By[(i,j)] = np.where(Ay == 2**j - 2**i)
 
-    if find_triples:
-        Tx = shifted_index(np.where(np.logical_and(Ax[1:,:], Ax[:-1,:])), 0, 1)
-        Ty = shifted_index(np.where(np.logical_and(Ay[:,1:], Ay[:,:-1])), 1, 1)
-        return Bx, By, Tx, Ty
-
     return Bx, By
 
-def shifted_index(x, index, shift, minimum=np.iinfo(np.int_).min,
-        maximum=np.iinfo(np.int_).max):
+def shifted_index(x, index, shift):
     """Shifts the indices of elements from an array.
 
     Helper function to deal with indices returned by `np.where()`.
@@ -482,9 +450,6 @@ def shifted_index(x, index, shift, minimum=np.iinfo(np.int_).min,
         Position of the shifted array in th tuple
     shift : integer
         Value by which to shift the array
-    minimum : integer
-    maximum : integer
-        Minimum and maximum values of new indices
 
     Returns
     -------
@@ -498,14 +463,7 @@ def shifted_index(x, index, shift, minimum=np.iinfo(np.int_).min,
     """
     import copy
     newx = copy.deepcopy(list(x))
-    try:
-        newx[index] += shift
-    except TypeError:
-        newx = np.array(newx)
-        newx[index] += shift
-    mask = np.logical_and(newx[index] >= minimum, newx[index] <= maximum)
-    newx[0] = newx[0][mask]
-    newx[1] = newx[1][mask]
+    newx[index] += shift
     return tuple(newx)
 
 def solve_multiple_parameters(variables, values, landscape, par, dx,
