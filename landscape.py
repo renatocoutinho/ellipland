@@ -165,7 +165,7 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
 
 
 def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
-        force_positive=False, verbose=True):
+        force_positive=False, skip_refine=False, verbose=True):
     r"""Find the stationary solution for a landscape with many types of habitat.
 
     Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
@@ -205,6 +205,10 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     force_positive : bool
         make sure the solution is always non-negative - in a hacky way. Default
         False
+    skip_refine : bool
+        do not refine the grid to calculate the residual. This can greatly
+        improve speed, but will generate errors (even silent wrong results) if
+        the landscape has contiguous interfaces
     verbose : bool
         print residue of the solution and its maximum and minimum values
 
@@ -281,6 +285,11 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
 
     """
     from scipy.optimize import newton_krylov
+
+    if not skip_refine:
+        # refine the grid to avoid contiguous interfaces
+        landscape = refine_grid(landscape)
+        dx /= 2
 
     n = np.unique(landscape).astype(int)
 
@@ -395,6 +404,8 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         print('Residual: %e' % abs(residual(sol)).max())
         print('max. pop.: %f' % sol.max())
         print('min. pop.: %f' % sol.min())
+    if not skip_refine:
+        sol = coarse_grid(sol)
 
     return sol
 
