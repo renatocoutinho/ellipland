@@ -165,7 +165,8 @@ def solve_landscape(landscape, par, dx, f_tol=None, force_positive=False, verbos
 
 
 def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
-        force_positive=False, skip_refine=False, verbose=True):
+        force_positive=False, skip_refine=False, return_residual=False,
+        verbose=True):
     r"""Find the stationary solution for a landscape with many types of habitat.
 
     Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
@@ -209,6 +210,8 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         do not refine the grid to calculate the residual. This can greatly
         improve speed, but will generate errors (even silent wrong results) if
         the landscape has contiguous interfaces
+    return_residual : bool
+        returns only the residual function, without calculating the solution
     verbose : bool
         print residue of the solution and its maximum and minimum values
 
@@ -393,6 +396,9 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
 
         return D*(d2x + d2y)/dx/dx + r*P + c*P**2
 
+    if return_residual:
+        return residual
+
     # solve
     guess = r.copy()
     guess[guess>0] = 1/((-c/r)[guess>0])
@@ -408,6 +414,245 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
         sol = coarse_grid(sol)
 
     return sol
+
+def solve_landscape_ntypes_nspecies(landscape, par, dx, f_tol=None,
+        force_positive=False, skip_refine=False, verbose=True):
+    '''Find the stationary solution for a given landscape and set of parameters.
+
+    Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
+    stationary solution (or the solution to the elliptical problem) to the
+    system of 2n equations in 2 dimensions (x is a 2-d vector):
+
+    .. math::
+        \\frac{\partial u_{ik}}{\partial t} &= D_k \\nabla^2 u_{ik} + r_{ik} u_{ik} (1-\sum_{j=1}^n \\alpha_j u_{jk}) = 0
+
+    where i runs over the n species and k over the patch types.
+
+    Parameters
+    ----------
+    landscape : 2-d array of ints
+        describe the landscape, with any number of habitat types
+    par : list
+        the first element is the matrix (or dict with tuple keys) of
+        competition coefficients, including the inverse of carrying capacities,
+        and the following elements are dicts with parameters as in the
+        `solve_landscape_ntypes()` function, except for the carrying capacity.
+    dx : float
+        length of each edge
+    f_tol : float
+        tolerance for the residue, passed on to the solver routine.  Default is
+        6e-6
+    force_positive : bool
+        make sure the solution is always non-negative - in a hacky way. Default
+        False
+    skip_refine : bool
+        do not refine the grid to calculate the residual. This can greatly
+        improve speed, but will generate errors (even silent wrong results) if
+        the landscape has contiguous interfaces
+    return_residual : bool
+        returns only the residual function, without calculating the solution
+    verbose : bool
+        print residue of the solution and its maximum and minimum values
+
+    Returns
+    -------
+    solution : 2-d array of the same shape of the landscape input containing
+        the solution
+
+    Boundary and interface conditions
+    ---------------------------------
+    External boundaries are of the form
+
+    .. math::
+        a \\nabla u \cdot \hat{n} + b u + c = 0
+
+    and may be different for left, right, top, bottom.  The derivative of u is
+    taken along the normal to the boundary.
+
+    The interfaces between patches and matrix are given by
+
+    .. math::
+        u(x) &= \gamma v(x) \\\\
+        D_p \\nabla u(x) \cdot \hat{n} &= D_m \\nabla v(x) \cdot \hat{n}
+
+    where u is a patch and v is the solution in the matrix.
+
+    '''
+    from scipy.optimize import newton_krylov
+
+    N = len(par) - 1
+    n = np.unique(landscape).astype(int)
+
+    resi = np.array([ solve_landscape_ntypes(landscape, dict(p,
+        K=np.Inf*np.ones(len(n))), dx, f_tol=f_tol, force_positive=force_positive,
+        skip_refine=skip_refine, return_residual=True) for p in par[1:] ])
+
+    sec_term = np.zeros((N, landscape.shape[0], landscape.shape[1]))
+    for i in range(N):
+        for k in n:
+            lk = np.where(landscape == k)
+            # bug here
+            sec_term[i,:,:][k] = par[0][k]
+
+    def residual(P):
+        if force_positive:
+            P = np.abs(P)
+        res = []
+        # loops are for lazy people
+        for i, Pi in enumerate(P):
+            res.append(resi[i,:,:] - Pi * (sec_term[i,:,:] * P).sum(axis=0))
+        return res
+
+    if return_residual:
+        return residual
+
+    # build guess based on where growth is positive
+    guess = np.zeros((N, landscape.shape[0], landscape.shape[1]))
+    for i in range(N):
+        for k in n:
+            lk = np.where(landscape == k)
+            rik = par[i+1]['r'][k]
+            if rik <= 0:
+                guess[i,:,:][k] = 1e-6
+            else:
+                guess[i,:,:][k] =  -rik / par[0][k][i,i]
+
+    # solve
+    sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
+    if force_positive:
+        sol = np.abs(sol)
+    if verbose:
+        print('Residual: %e' % abs(residual(sol)).max())
+        print('max. pop.: %f' % sol.max())
+        print('min. pop.: %f' % sol.min())
+
+    return sol
+
+def solve_landscape_nspecies(landscape, par, dx, f_tol=None,
+        force_positive=False, skip_refine=False, verbose=True):
+    '''Find the stationary solution for a given landscape and set of parameters.
+
+    Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
+    stationary solution (or the solution to the elliptical problem) to the
+    system of 2n equations in 2 dimensions (x is a 2-d vector):
+
+    .. math::
+        \\frac{\partial u_i}{\partial t} &= D_p \\nabla^2 u_i + r_i u_i (1-\sum_{j=1}^n \\alpha_j u_j) = 0 \\text{ in a patch} \\\\
+        \\frac{\partial v_i}{\partial t} &= D_m \\nabla^2 v_i - \mu_i v_i = 0 \\text{ in the matrix}
+
+    Notes
+    -----
+    This function preserves the original interface, but internally it calls the
+    newer `solve_landscape_ntypes_nspecies()`.
+
+    Parameters
+    ----------
+    landscape : a 2-d array (of ints) describing the landscape, with 1 on
+        patches and 0 on matrix
+    par : a ordered dict containing parameters in the following order:
+        r: list of reproductive rates on patches
+        alpha: matrix of interaction parameters on patches (diagonals are minus the inverse of carrying capacity)
+        mu: list of mortality rates in the matrix
+        Dp: list of diffusivities on patches
+        Dm: list of diffusivities in the matrix
+        g: habitat preference parameter \gamma, usually less than one. See interface conditions below
+        left: (a, b, c): external boundary conditions at left border
+        right: (a, b, c): external boundary conditions at right border
+        top: (a, b, c): external boundary conditions at top border
+        bottom: (a, b, c): external boundary conditions at bottom border
+
+    dx : float
+        length of each edge
+    f_tol : float
+        tolerance for the residue, passed on to the solver routine.  Default is
+        6e-6
+    force_positive : bool
+        make sure the solution is always non-negative - in a hacky way. Default
+        False
+    skip_refine : bool
+        do not refine the grid to calculate the residual. This can greatly
+        improve speed, but will generate errors (even silent wrong results) if
+        the landscape has contiguous interfaces
+    verbose : bool
+        print residue of the solution and its maximum and minimum values
+
+    Returns
+    -------
+    solution : 2-d array of the same shape of the landscape input containing
+        the solution
+
+    Boundary and interface conditions
+    ---------------------------------
+    External boundaries are of the form
+
+    .. math::
+        a \\nabla u \cdot \hat{n} + b u + c = 0
+
+    and may be different for left, right, top, bottom.  The derivative of u is
+    taken along the normal to the boundary.
+
+    The interfaces between patches and matrix are given by
+
+    .. math::
+        u(x) &= \gamma v(x) \\\\
+        D_p \\nabla u(x) \cdot \hat{n} &= D_m \\nabla v(x) \cdot \hat{n}
+
+    where u is a patch and v is the solution in the matrix. These conditions
+    are handled using an assymetric finite difference scheme for the 2nd
+    derivative:
+
+    .. math::
+        u_xx(x) = (4/3/h**2) (u(x-h) - 3 u(x) + 2 u(x+h/2))
+
+    with the approximations at the interface:
+
+    .. math::
+        u(x+h/2) = (Dm*v(x+h)+Dp*u(x))/(Dp+Dm*g)
+
+    if u(x) is in a patch and v(x+h) is in the matrix, or
+
+    .. math::
+        v(x+h/2) = g*(Dm*v(x)+Dp*u(x+h))/(Dp+Dm*g)
+
+    if v(x) is in the matrix and u(x+h) is in a patch.
+
+    Example
+    -------
+    >>> from landscape import *
+    >>> parn = OrderedDict([
+        ('rp', [0.1, 0.]),
+        ('rm', [-0.01, 0.1]),
+        ('alphap', [[1., 1.], [2., 2.]]),
+        ('alpham', [[1., 1.], [2., 2.]]),
+        ('Dp', [5e-4, 5e-3]),
+        ('Dm', [5e-3, 5e-3]),
+        # interface condition can be omitted!
+        #('g', [.1, 1.]),
+        # boundary conditions
+        ('left', [1., 0., 0.]),
+        ('right', [1., 0., 0.]),
+        ('top', [1., 0., 0.]),
+        ('bottom', [1., 0., 0.])
+        ])
+    >>> lA = loadtxt('landA.txt')
+    >>> sol = solve_landscape_nspecies(lA, parn, dx)
+
+    '''
+    p0 = [ par['alpham'], par['alphap'] ]
+    p1 = dict(
+            r = [par['rm'][0], par['rp'][0]],
+            D = [par['Dm'][0], par['Dp'][0]],
+            **{ k: par[k] for k in ['left', 'right', 'top', 'bottom'] }
+            )
+    p2 = dict(
+            r = [par['rm'][1], par['rp'][1]],
+            D = [par['Dm'][1], par['Dp'][1]],
+            **{ k: par[k] for k in ['left', 'right', 'top', 'bottom'] }
+            )
+    newpar = [p0, p1, p2]
+
+    return solve_landscape_ntypes_nspecies(landscape, newpar, dx, f_tol=f_tol,
+            skip_refine=skip_refine, verbose=verbose)
 
 def find_interfaces(landscape):
     '''Helper function that marks where are the internal boundaries.'''
