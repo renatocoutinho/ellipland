@@ -416,7 +416,8 @@ def solve_landscape_ntypes(landscape, par, dx, f_tol=None,
     return sol
 
 def solve_landscape_ntypes_nspecies(landscape, par, dx, f_tol=None,
-        force_positive=False, skip_refine=False, verbose=True):
+        force_positive=False, skip_refine=False, return_residual=False,
+        verbose=True):
     '''Find the stationary solution for a given landscape and set of parameters.
 
     Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
@@ -480,19 +481,25 @@ def solve_landscape_ntypes_nspecies(landscape, par, dx, f_tol=None,
     '''
     from scipy.optimize import newton_krylov
 
+    if not skip_refine:
+        # refine the grid to avoid contiguous interfaces
+        landscape = refine_grid(landscape)
+        dx /= 2
+
     N = len(par) - 1
     n = np.unique(landscape).astype(int)
 
-    resi = np.array([ solve_landscape_ntypes(landscape, dict(p,
-        K=np.Inf*np.ones(len(n))), dx, f_tol=f_tol, force_positive=force_positive,
-        skip_refine=skip_refine, return_residual=True) for p in par[1:] ])
+    resi = [ solve_landscape_ntypes(landscape, dict(p,
+        K=np.Inf*np.ones(len(n))), dx, f_tol=f_tol,
+        force_positive=force_positive, skip_refine=True, return_residual=True)
+        for p in par[1:] ]
 
-    sec_term = np.zeros((N, landscape.shape[0], landscape.shape[1]))
+    sec_term = np.zeros((N, N, landscape.shape[0], landscape.shape[1]))
     for i in range(N):
         for k in n:
             lk = np.where(landscape == k)
             # bug here
-            sec_term[i,:,:][k] = par[0][k]
+            sec_term[:,:,lk] = np.array(par[0][k])[:,:,None,None]
 
     def residual(P):
         if force_positive:
@@ -500,7 +507,7 @@ def solve_landscape_ntypes_nspecies(landscape, par, dx, f_tol=None,
         res = []
         # loops are for lazy people
         for i, Pi in enumerate(P):
-            res.append(resi[i,:,:] - Pi * (sec_term[i,:,:] * P).sum(axis=0))
+            res.append(resi[i](Pi) - Pi * (sec_term[i,:,:] * P).sum(axis=0))
         return res
 
     if return_residual:
@@ -515,16 +522,19 @@ def solve_landscape_ntypes_nspecies(landscape, par, dx, f_tol=None,
             if rik <= 0:
                 guess[i,:,:][k] = 1e-6
             else:
-                guess[i,:,:][k] =  -rik / par[0][k][i,i]
+                guess[i,:,:][k] =  -rik / par[0][k][i][i]
 
     # solve
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
     if force_positive:
         sol = np.abs(sol)
     if verbose:
-        print('Residual: %e' % abs(residual(sol)).max())
+        print('Residual: %e' % np.abs(residual(sol)).max())
         print('max. pop.: %f' % sol.max())
         print('min. pop.: %f' % sol.min())
+
+    if not skip_refine:
+        sol = coarse_grid(sol)
 
     return sol
 
