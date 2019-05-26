@@ -8,21 +8,21 @@ try:
 except ImportError:
     pass
 
-par = OrderedDict([ 
-    ('r', 0.1),
-    ('K', 1.),
-    ('mu', 0.03),
-    ('Dp', 1e-4),
-    ('Dm', 1e-3),
-    # interface condition (=Dm/Dp)
-    #('g', 1.), # no longer required
-    # boundary conditions
-    ('left', [1., 0., 0.]),
-    ('right', [1., 0., 0.]),
-    ('top', [1., 0., 0.]),
-    ('bottom', [1., 0., 0.])
-    ])
-
+## example parameters
+#par = OrderedDict([
+#    ('r', 0.1),
+#    ('K', 1.),
+#    ('mu', 0.03),
+#    ('Dp', 1e-4),
+#    ('Dm', 1e-3),
+#    # interface condition (=Dm/Dp)
+#    #('g', 1.), # no longer required
+#    # boundary conditions
+#    ('left', [1., 0., 0.]),
+#    ('right', [1., 0., 0.]),
+#    ('top', [1., 0., 0.]),
+#    ('bottom', [1., 0., 0.])
+#    ])
 # in km
 #dx = 0.0286
 # 35 pixels -> 1km = 1000m
@@ -478,6 +478,32 @@ def solve_landscape_ntypes_nspecies(landscape, par, dx, f_tol=None,
 
     where u is a patch and v is the solution in the matrix.
 
+    Example
+    -------
+    >>> from landscape import *
+    >>> lA = loadtxt('landA.txt')
+    >>> par = [
+            [
+                [[0, 0],
+                 [0.1, 0.1]],
+                [[0.1, 0],
+                 [0.1, 0.1]]
+            ],
+            {'r': [-0.03, 0.1],
+             'D': [0.001, 0.0001],
+             'left': [1.0, 0.0, 0.0],
+             'right': [1.0, 0.0, 0.0],
+             'top': [1.0, 0.0, 0.0],
+             'bottom': [1.0, 0.0, 0.0]},
+            {'r': [0.05, 0.05],
+             'D': [0.001, 0.001],
+             'left': [1.0, 0.0, 0.0],
+             'right': [1.0, 0.0, 0.0],
+             'top': [1.0, 0.0, 0.0],
+             'bottom': [1.0, 0.0, 0.0]}
+            ]
+    >>> sol = solve_landscape_ntypes_nspecies(lA, par, dx)
+
     '''
     from scipy.optimize import newton_krylov
 
@@ -490,24 +516,22 @@ def solve_landscape_ntypes_nspecies(landscape, par, dx, f_tol=None,
     n = np.unique(landscape).astype(int)
 
     resi = [ solve_landscape_ntypes(landscape, dict(p,
-        K=np.Inf*np.ones(len(n))), dx, f_tol=f_tol,
-        force_positive=force_positive, skip_refine=True, return_residual=True)
+        K=np.Inf*np.ones(len(n))), dx, skip_refine=True, return_residual=True)
         for p in par[1:] ]
 
     sec_term = np.zeros((N, N, landscape.shape[0], landscape.shape[1]))
-    for i in range(N):
+    for i,j in iproduct(range(N), range(N)):
         for k in n:
             lk = np.where(landscape == k)
-            # bug here
-            sec_term[:,:,lk] = np.array(par[0][k])[:,:,None,None]
+            sec_term[i,j][lk] = par[0][k][i][j]
 
     def residual(P):
         if force_positive:
             P = np.abs(P)
-        res = []
+        res = np.zeros_like(P)
         # loops are for lazy people
         for i, Pi in enumerate(P):
-            res.append(resi[i](Pi) - Pi * (sec_term[i,:,:] * P).sum(axis=0))
+            res[i,:,:] = resi[i](Pi) - Pi * (sec_term[i,:,:] * P).sum(axis=0)
         return res
 
     if return_residual:
@@ -520,18 +544,19 @@ def solve_landscape_ntypes_nspecies(landscape, par, dx, f_tol=None,
             lk = np.where(landscape == k)
             rik = par[i+1]['r'][k]
             if rik <= 0:
-                guess[i,:,:][k] = 1e-6
+                guess[i,:,:][lk] = 1e-6
             else:
-                guess[i,:,:][k] =  -rik / par[0][k][i][i]
+                guess[i,:,:][lk] =  rik / par[0][k][i][i]
 
     # solve
     sol = newton_krylov(residual, guess, method='lgmres', f_tol=f_tol)
     if force_positive:
         sol = np.abs(sol)
     if verbose:
-        print('Residual: %e' % np.abs(residual(sol)).max())
-        print('max. pop.: %f' % sol.max())
-        print('min. pop.: %f' % sol.min())
+        print('Residuals:', *[ '%e' % i for i in
+            np.abs(residual(sol)).max(axis=(1,2)) ])
+        print('max. pops.:', *[ '%f' % i for i in sol.max(axis=(1,2)) ])
+        print('min. pops.:', *[ '%f' % i for i in sol.min(axis=(1,2)) ])
 
     if not skip_refine:
         sol = coarse_grid(sol)
@@ -630,12 +655,12 @@ def solve_landscape_nspecies(landscape, par, dx, f_tol=None,
     -------
     >>> from landscape import *
     >>> parn = OrderedDict([
-        ('rp', [0.1, 0.]),
-        ('rm', [-0.01, 0.1]),
-        ('alphap', [[1., 1.], [2., 2.]]),
-        ('alpham', [[1., 1.], [2., 2.]]),
-        ('Dp', [5e-4, 5e-3]),
-        ('Dm', [5e-3, 5e-3]),
+        ('rp', [0.1, 0.05]),
+        ('rm', [-0.03, 0.05]),
+        ('alphap', [[0.1, 0], [0.1, 0.1]]),
+        ('alpham', [[0., 0.], [0.1, 0.1]]),
+        ('Dp', [1e-4, 1e-3]),
+        ('Dm', [1e-3, 1e-3]),
         # interface condition can be omitted!
         #('g', [.1, 1.]),
         # boundary conditions
@@ -863,12 +888,12 @@ def refine_grid(landscape, n=2):
 def coarse_grid(landscape):
     '''Decrease resolution of a grid by a factor of 2.
 
-    Each square of 2 by 2 pixels is replaced by a single pixel with its average
-    value.
+    Each square of 2 by 2 pixels over the last two axes is replaced by a single
+    pixel with its average value.
 
     '''
-    a = (landscape[::2,:] + landscape[1::2,:]) / 2
-    return (a[:,::2] + a[:,1::2]) / 2
+    a = (landscape[...,::2,:] + landscape[...,1::2,:]) / 2
+    return (a[...,:,::2] + a[...,:,1::2]) / 2
 
 def image_to_landscape(image):
     '''Converts an image (in any RGB format) to a 2d array of ones and zeroes.
@@ -1069,4 +1094,27 @@ def plot_density_area(pops, labels, xlog=True, ylog=False):
     elif ylog:
         plt.yscale('log')
     plt.legend(loc='best', frameon=False)
+
+def plot_nspecies(landscape, solutions, dx=dx):
+    from matplotlib.gridspec import GridSpec
+    n = len(solutions)
+    K = np.ceil(max([ s.max() for s in solutions ]))
+    extent = (0, landscape.shape[1]*dx, 0, landscape.shape[0]*dx)
+
+    fig = plt.figure(figsize=(1.4, n+1))
+    gs = GridSpec(n+2, 1, height_ratios=(n+1)*[10]+[1])
+    plt.subplot(gs[0])
+    plt.imshow(landscape, cmap=plt.cm.binary, origin='lower',
+            interpolation='none', extent=extent)
+    plt.tick_params(labelbottom=False, labelleft=False)
+
+    for i, s in enumerate(solutions):
+        plt.subplot(gs[i+1])
+        plt.imshow(s, cmap=plt.cm.jet, origin='lower', interpolation='none',
+                extent=extent, vmin=0, vmax = K)
+        plt.tick_params(labelbottom=False, labelleft=False)
+    ax=plt.subplot(gs[n+1])
+    plt.colorbar(orientation='horizontal', cax=ax)
+    plt.tight_layout(0.1)
+    return fig
 
