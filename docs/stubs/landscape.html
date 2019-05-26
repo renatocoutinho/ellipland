@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>landscape &#8212; ellipland  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -37,59 +35,67 @@
 <span id="landscape"></span><h1>landscape<a class="headerlink" href="#module-landscape" title="Permalink to this headline">¶</a></h1>
 <p>Single species, one type of patch and matrix - basic module.</p>
 <p class="rubric">Functions</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-center">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#landscape.find_interfaces" title="landscape.find_interfaces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_interfaces</span></code></a>(landscape)</td>
-<td>Helper function that marks where are the internal boundaries.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#landscape.find_interfaces" title="landscape.find_interfaces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_interfaces</span></code></a>(landscape)</p></td>
+<td><p>Helper function that marks where are the internal boundaries.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#landscape.find_interfaces_ntypes" title="landscape.find_interfaces_ntypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_interfaces_ntypes</span></code></a>(landscape)</td>
-<td>Determines internal boundaries for landscapes with many habitat types.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#landscape.find_interfaces_ntypes" title="landscape.find_interfaces_ntypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_interfaces_ntypes</span></code></a>(landscape)</p></td>
+<td><p>Determines internal boundaries for landscapes with many habitat types.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_exponential</span></code>(count)</td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_exponential</span></code>(count)</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#landscape.image_to_landscape" title="landscape.image_to_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_to_landscape</span></code></a>(image)</td>
-<td>Converts an image (in any RGB format) to a 2d array of ones and zeroes.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#landscape.image_to_landscape" title="landscape.image_to_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image_to_landscape</span></code></a>(image)</p></td>
+<td><p>Converts an image (in any RGB format) to a 2d array of ones and zeroes.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_density_area</span></code>(pops,&nbsp;labels[,&nbsp;xlog,&nbsp;ylog])</td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_density_area</span></code>(pops, labels[, xlog, ylog])</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_landscape</span></code>(landscape,&nbsp;solution[,&nbsp;dx,&nbsp;K])</td>
-<td></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_landscape</span></code>(landscape, solution[, dx, K])</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#landscape.popcount_patches" title="landscape.popcount_patches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popcount_patches</span></code></a>(landscape,&nbsp;solution)</td>
-<td>Labels patches and sums total area and population in each one.</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#landscape.popcount_patches" title="landscape.popcount_patches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popcount_patches</span></code></a>(landscape, solution)</p></td>
+<td><p>Labels patches and sums total area and population in each one.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#landscape.random_landscape" title="landscape.random_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_landscape</span></code></a>(cover,&nbsp;frag,&nbsp;size[,&nbsp;…])</td>
-<td>Generates random square landscapes with a given cover and fragmentation.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#landscape.random_landscape" title="landscape.random_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_landscape</span></code></a>(cover, frag, size[, …])</p></td>
+<td><p>Generates random square landscapes with a given cover and fragmentation.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_landscape_inv</span></code>(cover,&nbsp;frag,&nbsp;size[,&nbsp;…])</td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_landscape_inv</span></code>(cover, frag, size[, …])</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#landscape.refine_grid" title="landscape.refine_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_grid</span></code></a>(landscape[,&nbsp;n])</td>
-<td>Increase the resolution of a landscape grid by a factor of n.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#landscape.refine_grid" title="landscape.refine_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">refine_grid</span></code></a>(landscape[, n])</p></td>
+<td><p>Increase the resolution of a landscape grid by a factor of n.</p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#landscape.solve_landscape" title="landscape.solve_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_landscape</span></code></a>(landscape,&nbsp;par,&nbsp;dx[,&nbsp;f_tol,&nbsp;…])</td>
-<td>Find the stationary solution for a given landscape and set of parameters.</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#landscape.solve_landscape" title="landscape.solve_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_landscape</span></code></a>(landscape, par, dx[, f_tol, …])</p></td>
+<td><p>Find the stationary solution for a given landscape and set of parameters.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#landscape.solve_landscape_ntypes" title="landscape.solve_landscape_ntypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_landscape_ntypes</span></code></a>(landscape,&nbsp;par,&nbsp;dx[,&nbsp;…])</td>
-<td>Find the stationary solution for a landscape with many types of habitat.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#landscape.solve_landscape_ntypes" title="landscape.solve_landscape_ntypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_landscape_ntypes</span></code></a>(landscape, par, dx[, …])</p></td>
+<td><p>Find the stationary solution for a landscape with many types of habitat.</p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#landscape.solve_multiple_landscapes" title="landscape.solve_multiple_landscapes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_multiple_landscapes</span></code></a>(landscapes,&nbsp;par,&nbsp;dx)</td>
-<td>Solve several landscapes.</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#landscape.solve_multiple_landscapes" title="landscape.solve_multiple_landscapes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_multiple_landscapes</span></code></a>(landscapes, par, dx)</p></td>
+<td><p>Solve several landscapes.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#landscape.solve_multiple_parameters" title="landscape.solve_multiple_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_multiple_parameters</span></code></a>(variables,&nbsp;values,&nbsp;…)</td>
-<td>Solve given landscape for several combinations of parameters.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#landscape.solve_multiple_parameters" title="landscape.solve_multiple_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_multiple_parameters</span></code></a>(variables, values, …)</p></td>
+<td><p>Solve given landscape for several combinations of parameters.</p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#landscape.statistics_landscape" title="landscape.statistics_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">statistics_landscape</span></code></a>(landscape[,&nbsp;labels])</td>
-<td>Labels patches and sums total area in each one.</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#landscape.statistics_landscape" title="landscape.statistics_landscape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">statistics_landscape</span></code></a>(landscape[, labels])</p></td>
+<td><p>Labels patches and sums total area in each one.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="function">
+<dt id="landscape.coarse_grid">
+<code class="descclassname">landscape.</code><code class="descname">coarse_grid</code><span class="sig-paren">(</span><em>landscape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#coarse_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.coarse_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decrease resolution of a grid by a factor of 2.</p>
+<p>Each square of 2 by 2 pixels over the last two axes is replaced by a single
+pixel with its average value.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="landscape.find_interfaces">
 <code class="descclassname">landscape.</code><code class="descname">find_interfaces</code><span class="sig-paren">(</span><em>landscape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#find_interfaces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.find_interfaces" title="Permalink to this definition">¶</a></dt>
@@ -100,18 +106,16 @@
 <dt id="landscape.find_interfaces_ntypes">
 <code class="descclassname">landscape.</code><code class="descname">find_interfaces_ntypes</code><span class="sig-paren">(</span><em>landscape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#find_interfaces_ntypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.find_interfaces_ntypes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines internal boundaries for landscapes with many habitat types.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>landscape</strong> (<em>2-d array</em>) – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>Bx, By</strong> (<em>tuple of two dicts</em>) – each key is a tuple (i,j) corresponding to the numbers of the habitat
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>landscape</strong> (<em>2-d array</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Bx, By</strong> (<em>tuple of two dicts</em>) – each key is a tuple (i,j) corresponding to the numbers of the habitat
 types, and the value corresponds to the indices where a boundary
-between them appears, along either the x or y direction</td>
-</tr>
-</tbody>
-</table>
+between them appears, along either the x or y direction</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -119,65 +123,55 @@ between them appears, along either the x or y direction</td>
 <code class="descclassname">landscape.</code><code class="descname">image_to_landscape</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#image_to_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.image_to_landscape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts an image (in any RGB format) to a 2d array of ones and zeroes.</p>
 <p>Most image formats (including TIFF) requires PIL.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> (<em>string</em>) – image filename</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>landscape</strong> (<em>2-d array</em>) – ones and zeroes, where ones correspond to darker shades in the original
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>image</strong> (<em>string</em>) – image filename</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>landscape</strong> (<em>2-d array</em>) – ones and zeroes, where ones correspond to darker shades in the original
 image, which should correspond to patch, while the lighter shades
-represent the matrix</td>
-</tr>
-</tbody>
-</table>
+represent the matrix</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="landscape.popcount_patches">
 <code class="descclassname">landscape.</code><code class="descname">popcount_patches</code><span class="sig-paren">(</span><em>landscape</em>, <em>solution</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#popcount_patches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.popcount_patches" title="Permalink to this definition">¶</a></dt>
 <dd><p>Labels patches and sums total area and population in each one.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>landscape</strong> (<em>2-d array</em>) – ones and zeroes representing patches and matrix</li>
-<li><strong>solution</strong> (<em>2-d array</em>) – solution to the system</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landscape</strong> (<em>2-d array</em>) – ones and zeroes representing patches and matrix</p></li>
+<li><p><strong>solution</strong> (<em>2-d array</em>) – solution to the system</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>array</strong> (<em>2-d array</em>) – the first line is the area and the second is the total population. The
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>array</strong> (<em>2-d array</em>) – the first line is the area and the second is the total population. The
 first column is the total area and population in the matrix.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="landscape.random_landscape">
 <code class="descclassname">landscape.</code><code class="descname">random_landscape</code><span class="sig-paren">(</span><em>cover</em>, <em>frag</em>, <em>size</em>, <em>radius=1</em>, <em>norm='taxicab'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#random_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.random_landscape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates random square landscapes with a given cover and fragmentation.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>cover</strong> (<em>integer smaller than size**2</em><em>, </em><em>total number of patch elements</em>) – </li>
-<li><strong>frag</strong> (<em>float between 0 and 1</em><em> (</em><em>both exclusive</em><em>)</em><em>, </em><em>gives the level of</em>) – fragmentation, with 0 being a single clump and 1 a totally random
-(scattered) landscape</li>
-<li><strong>size</strong> (<em>integer</em><em>, </em><em>lenght of the landscape</em><em> (</em><em>total area is size squared</em><em>)</em>) – </li>
-<li><strong>radius</strong> (<em>integer</em><em>, </em><em>maximum distance at which an element is considered to be</em>) – a neighbour of another</li>
-<li><strong>norm</strong> (<em>one of 'maximum'</em><em> or </em><em>'taxicab'</em><em>, </em><em>defines the norm used for measuring</em>) – distances between elements of the landscape</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cover</strong> (<em>integer smaller than size**2</em><em>, </em><em>total number of patch elements</em>) – </p></li>
+<li><p><strong>frag</strong> (<em>float between 0 and 1</em><em> (</em><em>both exclusive</em><em>)</em><em>, </em><em>gives the level of</em>) – fragmentation, with 0 being a single clump and 1 a totally random
+(scattered) landscape</p></li>
+<li><p><strong>size</strong> (<em>integer</em><em>, </em><em>lenght of the landscape</em><em> (</em><em>total area is size squared</em><em>)</em>) – </p></li>
+<li><p><strong>radius</strong> (<em>integer</em><em>, </em><em>maximum distance at which an element is considered to be</em>) – a neighbour of another</p></li>
+<li><p><strong>norm</strong> (<em>one of 'maximum'</em><em> or </em><em>'taxicab'</em><em>, </em><em>defines the norm used for measuring</em>) – distances between elements of the landscape</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>landscape</strong> (<em>a square 2-d array of zeroes and ones</em>)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>landscape</strong> (<em>a square 2-d array of zeroes and ones</em>)</p>
+</dd>
+</dl>
 <p class="rubric">References</p>
 <p>Lenore Fahrig, Relative Effects of Habitat Loss and Fragmentation on
 Population Extinction, The Journal of Wildlife Management, Vol. 61, No. 3
@@ -195,22 +189,18 @@ Population Extinction, The Journal of Wildlife Management, Vol. 61, No. 3
 <code class="descclassname">landscape.</code><code class="descname">shifted_index</code><span class="sig-paren">(</span><em>x</em>, <em>index</em>, <em>shift</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#shifted_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.shifted_index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shifts the indices of elements from an array.</p>
 <p>Helper function to deal with indices returned by <cite>np.where()</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>tuple of arrays</em>) – </li>
-<li><strong>index</strong> (<em>integer</em>) – Position of the shifted array in th tuple</li>
-<li><strong>shift</strong> (<em>integer</em>) – Value by which to shift the array</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>tuple of arrays</em>) – </p></li>
+<li><p><strong>index</strong> (<em>integer</em>) – Position of the shifted array in th tuple</p></li>
+<li><p><strong>shift</strong> (<em>integer</em>) – Value by which to shift the array</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>out</strong> (<em>tuple of shifted arrays (same shape as input)</em>)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> (<em>tuple of shifted arrays (same shape as input)</em>)</p>
+</dd>
+</dl>
 <p class="rubric">Notes</p>
 <p>This function doesn’t affect the original arrays, it makes a copy, modifies
 and then returns it. For that reason, it’s not very efficient.</p>
@@ -229,45 +219,41 @@ v_t(x) &amp;= D_m \nabla^2 v(x) - \mu v(x) = 0 \text{ in the matrix}\end{split}\
 <p class="rubric">Notes</p>
 <p>This function preserves the original interface, but internally it calls the
 newer <cite>solve_landscape_ntypes()</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>landscape</strong> (<em>2-d array of ints</em>) – describe the landscape, with 1 on patches and 0 on matrix</li>
-<li><strong>par</strong> (<em>dict</em>) – <p>parameters (dict keys):</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landscape</strong> (<em>2-d array of ints</em>) – describe the landscape, with 1 on patches and 0 on matrix</p></li>
+<li><p><strong>par</strong> (<em>dict</em>) – <p>parameters (dict keys):</p>
 <ul>
-<li>r : reproductive rate on patches</li>
-<li>K : carrying capacity on patches</li>
-<li>mu : mortality rate in the matrix</li>
-<li>Dp : diffusivity on patches</li>
-<li>Dm : diffusivity in the matrix</li>
-<li>g : habitat discontinuity parameter gamma. See interface conditions
-below (optional, determined from Dp, Dm and alpha if absent)</li>
-<li>alpha : habitat preference, only taken into account if g is not
+<li><p>r : reproductive rate on patches</p></li>
+<li><p>K : carrying capacity on patches</p></li>
+<li><p>mu : mortality rate in the matrix</p></li>
+<li><p>Dp : diffusivity on patches</p></li>
+<li><p>Dm : diffusivity in the matrix</p></li>
+<li><p>g : habitat discontinuity parameter gamma. See interface conditions
+below (optional, determined from Dp, Dm and alpha if absent)</p></li>
+<li><p>alpha : habitat preference, only taken into account if g is not
 present. In that case, g is calculated as g = Dm * alpha /
 (Dp*(1-alpha)) (optional, ignored if g is given, set to 1/2 if both
-are absent)</li>
-<li>left : (a, b, c): external boundary conditions at left border</li>
-<li>right : (a, b, c): external boundary conditions at right border</li>
-<li>top : (a, b, c): external boundary conditions at top border</li>
-<li>bottom : (a, b, c): external boundary conditions at bottom border</li>
+are absent)</p></li>
+<li><p>left : (a, b, c): external boundary conditions at left border</p></li>
+<li><p>right : (a, b, c): external boundary conditions at right border</p></li>
+<li><p>top : (a, b, c): external boundary conditions at top border</p></li>
+<li><p>bottom : (a, b, c): external boundary conditions at bottom border</p></li>
 </ul>
-</li>
-<li><strong>dx</strong> (<em>float</em>) – lenght of each edge</li>
-<li><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine.  Default is
-6e-6</li>
-<li><strong>force_positive</strong> (<em>bool</em>) – make sure the solution is always non-negative - in a hacky way. Default
-False</li>
-<li><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values</li>
+</p></li>
+<li><p><strong>dx</strong> (<em>float</em>) – lenght of each edge</p></li>
+<li><p><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine.  Default is
+6e-6</p></li>
+<li><p><strong>force_positive</strong> (<em>bool</em>) – make sure the solution is always non-negative - in a hacky way. Default
+False</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>solution</strong> (<em>2-d array of the same shape of the landscape input</em>) – the solution</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>solution</strong> (<em>2-d array of the same shape of the landscape input</em>) – the solution</p>
+</dd>
+</dl>
 <p class="rubric">Boundary and interface conditions</p>
 <p>External boundaries are of the form</p>
 <div class="math notranslate nohighlight">
@@ -308,8 +294,94 @@ Applied Probability 40.3 (2003): 557-580.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="landscape.solve_landscape_nspecies">
+<code class="descclassname">landscape.</code><code class="descname">solve_landscape_nspecies</code><span class="sig-paren">(</span><em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>force_positive=False</em>, <em>skip_refine=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_landscape_nspecies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_landscape_nspecies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the stationary solution for a given landscape and set of parameters.</p>
+<p>Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
+stationary solution (or the solution to the elliptical problem) to the
+system of 2n equations in 2 dimensions (x is a 2-d vector):</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{\partial u_i}{\partial t} &amp;= D_p \nabla^2 u_i + r_i u_i (1-\sum_{j=1}^n \alpha_j u_j) = 0 \text{ in a patch} \\
+\frac{\partial v_i}{\partial t} &amp;= D_m \nabla^2 v_i - \mu_i v_i = 0 \text{ in the matrix}\end{split}\]</div>
+<p class="rubric">Notes</p>
+<p>This function preserves the original interface, but internally it calls the
+newer <cite>solve_landscape_ntypes_nspecies()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landscape</strong> (<em>a 2-d array</em><em> (</em><em>of ints</em><em>) </em><em>describing the landscape</em><em>, </em><em>with 1 on</em>) – patches and 0 on matrix</p></li>
+<li><p><strong>par</strong> (<em>a ordered dict containing parameters in the following order:</em>) – r: list of reproductive rates on patches
+alpha: matrix of interaction parameters on patches (diagonals are minus the inverse of carrying capacity)
+mu: list of mortality rates in the matrix
+Dp: list of diffusivities on patches
+Dm: list of diffusivities in the matrix
+g: habitat preference parameter gamma, usually less than one. See interface conditions below
+left: (a, b, c): external boundary conditions at left border
+right: (a, b, c): external boundary conditions at right border
+top: (a, b, c): external boundary conditions at top border
+bottom: (a, b, c): external boundary conditions at bottom border</p></li>
+<li><p><strong>dx</strong> (<em>float</em>) – length of each edge</p></li>
+<li><p><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine.  Default is
+6e-6</p></li>
+<li><p><strong>force_positive</strong> (<em>bool</em>) – make sure the solution is always non-negative - in a hacky way. Default
+False</p></li>
+<li><p><strong>skip_refine</strong> (<em>bool</em>) – do not refine the grid to calculate the residual. This can greatly
+improve speed, but will generate errors (even silent wrong results) if
+the landscape has contiguous interfaces</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>solution</strong> (<em>2-d array of the same shape of the landscape input containing</em>) – the solution</p></li>
+<li><p><em>Boundary and interface conditions</em></p></li>
+<li><p><em>———————————</em></p></li>
+<li><p><em>External boundaries are of the form</em></p></li>
+<li><p><em>.. math::</em> – a nabla u cdot hat{n} + b u + c = 0</p></li>
+<li><p><em>and may be different for left, right, top, bottom.  The derivative of u is</em></p></li>
+<li><p><em>taken along the normal to the boundary.</em></p></li>
+<li><p><em>The interfaces between patches and matrix are given by</em></p></li>
+<li><p><em>.. math::</em> – u(x) &amp;= gamma v(x) \
+D_p nabla u(x) cdot hat{n} &amp;= D_m nabla v(x) cdot hat{n}</p></li>
+<li><p><em>where u is a patch and v is the solution in the matrix. These conditions</em></p></li>
+<li><p><em>are handled using an assymetric finite difference scheme for the 2nd</em></p></li>
+<li><p><em>derivative</em></p></li>
+<li><p><em>.. math::</em> – u_xx(x) = (4/3/h**2) (u(x-h) - 3 u(x) + 2 u(x+h/2))</p></li>
+<li><p><em>with the approximations at the interface</em></p></li>
+<li><p><em>.. math::</em> – u(x+h/2) = (Dm*v(x+h)+Dp*u(x))/(Dp+Dm*g)</p></li>
+<li><p><em>if u(x) is in a patch and v(x+h) is in the matrix, or</em></p></li>
+<li><p><em>.. math::</em> – v(x+h/2) = g*(Dm*v(x)+Dp*u(x+h))/(Dp+Dm*g)</p></li>
+<li><p><em>if v(x) is in the matrix and u(x+h) is in a patch.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parn</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+<span class="go">    (&#39;rp&#39;, [0.1, 0.05]),</span>
+<span class="go">    (&#39;rm&#39;, [-0.03, 0.05]),</span>
+<span class="go">    (&#39;alphap&#39;, [[0.1, 0], [0.1, 0.1]]),</span>
+<span class="go">    (&#39;alpham&#39;, [[0., 0.], [0.1, 0.1]]),</span>
+<span class="go">    (&#39;Dp&#39;, [1e-4, 1e-3]),</span>
+<span class="go">    (&#39;Dm&#39;, [1e-3, 1e-3]),</span>
+<span class="go">    # interface condition can be omitted!</span>
+<span class="go">    #(&#39;g&#39;, [.1, 1.]),</span>
+<span class="go">    # boundary conditions</span>
+<span class="go">    (&#39;left&#39;, [1., 0., 0.]),</span>
+<span class="go">    (&#39;right&#39;, [1., 0., 0.]),</span>
+<span class="go">    (&#39;top&#39;, [1., 0., 0.]),</span>
+<span class="go">    (&#39;bottom&#39;, [1., 0., 0.])</span>
+<span class="go">    ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lA</span> <span class="o">=</span> <span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;landA.txt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">solve_landscape_nspecies</span><span class="p">(</span><span class="n">lA</span><span class="p">,</span> <span class="n">parn</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="landscape.solve_landscape_ntypes">
-<code class="descclassname">landscape.</code><code class="descname">solve_landscape_ntypes</code><span class="sig-paren">(</span><em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>force_positive=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_landscape_ntypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_landscape_ntypes" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">landscape.</code><code class="descname">solve_landscape_ntypes</code><span class="sig-paren">(</span><em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>force_positive=False</em>, <em>skip_refine=False</em>, <em>return_residual=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_landscape_ntypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_landscape_ntypes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the stationary solution for a landscape with many types of habitat.</p>
 <p>Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
 stationary solution (or the solution to the elliptical problem) to the
@@ -317,44 +389,44 @@ system of equations in 2 dimensions (x is a 2-d vector):</p>
 <div class="math notranslate nohighlight">
 \[\frac{\partial u_i}{\partial t} = D_i \nabla^2 u_i +
 r_i u_i\left(1-\frac{u}{K_i}\right) = 0\]</div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>landscape</strong> (<em>2-d array of ints</em>) – describe the landscape, with any number of habitat types</li>
-<li><strong>par</strong> (<em>dict</em>) – <p>parameters (dict keys):</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landscape</strong> (<em>2-d array of ints</em>) – describe the landscape, with any number of habitat types</p></li>
+<li><p><strong>par</strong> (<em>dict</em>) – <p>parameters (dict keys):</p>
 <ul>
-<li>r : growth rates (can be negative)</li>
-<li>K : carrying capacities (cn be np.Inf)</li>
-<li>mu : mortality rate in the matrix</li>
-<li>D : diffusivities</li>
-<li>g : dict of habitat discontinuities <span class="math notranslate nohighlight">\(\gamma_{ij}\)</span> - see interface
+<li><p>r : growth rates (can be negative)</p></li>
+<li><p>K : carrying capacities (cn be np.Inf)</p></li>
+<li><p>mu : mortality rate in the matrix</p></li>
+<li><p>D : diffusivities</p></li>
+<li><p>g : dict of habitat discontinuities <span class="math notranslate nohighlight">\(\gamma_{ij}\)</span> - see interface
 conditions below. The keys are tuples (i,j) of the habitat
-types indices (optional)</li>
-<li>alpha : dict of habitat preferences, only taken into account if g is
+types indices (optional)</p></li>
+<li><p>alpha : dict of habitat preferences, only taken into account if g is
 not present. In that case, <span class="math notranslate nohighlight">\(\gamma_{ij}\)</span> is calculated as
-<span class="math notranslate nohighlight">\(\gamma_{ij} = D_j \alpha_{ij} / (D_i*(1-\alpha_{ij}))\)</span> (optional)</li>
-<li>left : (a, b, c): external boundary conditions at left border</li>
-<li>right : (a, b, c): external boundary conditions at right border</li>
-<li>top : (a, b, c): external boundary conditions at top border</li>
-<li>bottom : (a, b, c): external boundary conditions at bottom border</li>
+<span class="math notranslate nohighlight">\(\gamma_{ij} = D_j \alpha_{ij} / (D_i*(1-\alpha_{ij}))\)</span> (optional)</p></li>
+<li><p>left : (a, b, c): external boundary conditions at left border</p></li>
+<li><p>right : (a, b, c): external boundary conditions at right border</p></li>
+<li><p>top : (a, b, c): external boundary conditions at top border</p></li>
+<li><p>bottom : (a, b, c): external boundary conditions at bottom border</p></li>
 </ul>
-</li>
-<li><strong>dx</strong> (<em>float</em>) – lenght of each edge</li>
-<li><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine.  Default is
-6e-6</li>
-<li><strong>force_positive</strong> (<em>bool</em>) – make sure the solution is always non-negative - in a hacky way. Default
-False</li>
-<li><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values</li>
+</p></li>
+<li><p><strong>dx</strong> (<em>float</em>) – lenght of each edge</p></li>
+<li><p><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine.  Default is
+6e-6</p></li>
+<li><p><strong>force_positive</strong> (<em>bool</em>) – make sure the solution is always non-negative - in a hacky way. Default
+False</p></li>
+<li><p><strong>skip_refine</strong> (<em>bool</em>) – do not refine the grid to calculate the residual. This can greatly
+improve speed, but will generate errors (even silent wrong results) if
+the landscape has contiguous interfaces</p></li>
+<li><p><strong>return_residual</strong> (<em>bool</em>) – returns only the residual function, without calculating the solution</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>solution</strong> (<em>2-d array of the same shape of the landscape input</em>) – the solution</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>solution</strong> (<em>2-d array of the same shape of the landscape input</em>) – the solution</p>
+</dd>
+</dl>
 <p class="rubric">Boundary and interface conditions</p>
 <p>External boundaries are of the form</p>
 <div class="math notranslate nohighlight">
@@ -410,35 +482,106 @@ D_p (u(x+h/2) - u(x))  &amp;= D_m (v(x+h) - v(x+h/2))\end{split}\]</div>
 </dd></dl>
 
 <dl class="function">
+<dt id="landscape.solve_landscape_ntypes_nspecies">
+<code class="descclassname">landscape.</code><code class="descname">solve_landscape_ntypes_nspecies</code><span class="sig-paren">(</span><em>landscape</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>force_positive=False</em>, <em>skip_refine=False</em>, <em>return_residual=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_landscape_ntypes_nspecies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_landscape_ntypes_nspecies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the stationary solution for a given landscape and set of parameters.</p>
+<p>Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a
+stationary solution (or the solution to the elliptical problem) to the
+system of 2n equations in 2 dimensions (x is a 2-d vector):</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial u_{ik}}{\partial t} &amp;= D_k \nabla^2 u_{ik} + r_{ik} u_{ik} (1-\sum_{j=1}^n \alpha_j u_{jk}) = 0\]</div>
+<p>where i runs over the n species and k over the patch types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landscape</strong> (<em>2-d array of ints</em>) – describe the landscape, with any number of habitat types</p></li>
+<li><p><strong>par</strong> (<em>list</em>) – the first element is the matrix (or dict with tuple keys) of
+competition coefficients, including the inverse of carrying capacities,
+and the following elements are dicts with parameters as in the
+<cite>solve_landscape_ntypes()</cite> function, except for the carrying capacity.</p></li>
+<li><p><strong>dx</strong> (<em>float</em>) – length of each edge</p></li>
+<li><p><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine.  Default is
+6e-6</p></li>
+<li><p><strong>force_positive</strong> (<em>bool</em>) – make sure the solution is always non-negative - in a hacky way. Default
+False</p></li>
+<li><p><strong>skip_refine</strong> (<em>bool</em>) – do not refine the grid to calculate the residual. This can greatly
+improve speed, but will generate errors (even silent wrong results) if
+the landscape has contiguous interfaces</p></li>
+<li><p><strong>return_residual</strong> (<em>bool</em>) – returns only the residual function, without calculating the solution</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>solution</strong> (<em>2-d array of the same shape of the landscape input containing</em>) – the solution</p></li>
+<li><p><em>Boundary and interface conditions</em></p></li>
+<li><p><em>———————————</em></p></li>
+<li><p><em>External boundaries are of the form</em></p></li>
+<li><p><em>.. math::</em> – a nabla u cdot hat{n} + b u + c = 0</p></li>
+<li><p><em>and may be different for left, right, top, bottom.  The derivative of u is</em></p></li>
+<li><p><em>taken along the normal to the boundary.</em></p></li>
+<li><p><em>The interfaces between patches and matrix are given by</em></p></li>
+<li><p><em>.. math::</em> – u(x) &amp;= gamma v(x) \
+D_p nabla u(x) cdot hat{n} &amp;= D_m nabla v(x) cdot hat{n}</p></li>
+<li><p><em>where u is a patch and v is the solution in the matrix.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lA</span> <span class="o">=</span> <span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;landA.txt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">par</span> <span class="o">=</span> <span class="p">[</span>
+<span class="go">        [</span>
+<span class="go">            [[0, 0],</span>
+<span class="go">             [0.1, 0.1]],</span>
+<span class="go">            [[0.1, 0],</span>
+<span class="go">             [0.1, 0.1]]</span>
+<span class="go">        ],</span>
+<span class="go">        {&#39;r&#39;: [-0.03, 0.1],</span>
+<span class="go">         &#39;D&#39;: [0.001, 0.0001],</span>
+<span class="go">         &#39;left&#39;: [1.0, 0.0, 0.0],</span>
+<span class="go">         &#39;right&#39;: [1.0, 0.0, 0.0],</span>
+<span class="go">         &#39;top&#39;: [1.0, 0.0, 0.0],</span>
+<span class="go">         &#39;bottom&#39;: [1.0, 0.0, 0.0]},</span>
+<span class="go">        {&#39;r&#39;: [0.05, 0.05],</span>
+<span class="go">         &#39;D&#39;: [0.001, 0.001],</span>
+<span class="go">         &#39;left&#39;: [1.0, 0.0, 0.0],</span>
+<span class="go">         &#39;right&#39;: [1.0, 0.0, 0.0],</span>
+<span class="go">         &#39;top&#39;: [1.0, 0.0, 0.0],</span>
+<span class="go">         &#39;bottom&#39;: [1.0, 0.0, 0.0]}</span>
+<span class="go">        ]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">solve_landscape_ntypes_nspecies</span><span class="p">(</span><span class="n">lA</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="landscape.solve_multiple_landscapes">
 <code class="descclassname">landscape.</code><code class="descname">solve_multiple_landscapes</code><span class="sig-paren">(</span><em>landscapes</em>, <em>par</em>, <em>dx</em>, <em>f_tol=None</em>, <em>verbose=True</em>, <em>force_positive=True</em>, <em>multiprocess=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#solve_multiple_landscapes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.solve_multiple_landscapes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solve several landscapes.</p>
 <p>Solves a set of landscape with a given set of parameters, optionally using
 multiprocessing to speed things up.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>landscape</strong> (<em>list of 2-d arrays</em>) – zeroes and ones describing the landscape</li>
-<li><strong>par</strong> (<em>ordered dict</em>) – values for all the problem parameters. See documentation for
-<cite>solve_landscape()</cite></li>
-<li><strong>dx</strong> (<em>float</em>) – lenght of each edge</li>
-<li><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine. Default is
-6e-6</li>
-<li><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landscape</strong> (<em>list of 2-d arrays</em>) – zeroes and ones describing the landscape</p></li>
+<li><p><strong>par</strong> (<em>ordered dict</em>) – values for all the problem parameters. See documentation for
+<cite>solve_landscape()</cite></p></li>
+<li><p><strong>dx</strong> (<em>float</em>) – lenght of each edge</p></li>
+<li><p><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine. Default is
+6e-6</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values.
 Notice that the order of appearance of each output is not the same as
-the input if multiprocess is True.</li>
-<li><strong>multiprocess</strong> (<em>bool</em>) – whether to use multiprocessing to use multiple cores. True by default,
-in which case the total number of CPUs minus one are used</li>
+the input if multiprocess is True.</p></li>
+<li><p><strong>multiprocess</strong> (<em>bool</em>) – whether to use multiprocessing to use multiple cores. True by default,
+in which case the total number of CPUs minus one are used</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>solutions</strong> (<em>list os 2-d arrays</em>) – solutions to each landscape, in the same ordering of the input values</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>solutions</strong> (<em>list os 2-d arrays</em>) – solutions to each landscape, in the same ordering of the input values</p>
+</dd>
+</dl>
 <p class="rubric">Example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="k">import</span> <span class="o">*</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="p">[</span> <span class="n">random_landscape</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="mi">70</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span> <span class="p">]</span>
@@ -453,34 +596,30 @@ in which case the total number of CPUs minus one are used</li>
 <dd><p>Solve given landscape for several combinations of parameters.</p>
 <p>Solves a given landscape with a set of common parameters and for a range of
 values for some variables, optionally using multiprocessing to speed it up.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>variables</strong> (<em>list of strings</em>) – names of the varied parameters</li>
-<li><strong>values</strong> (<em>list of lists</em><em> (or </em><em>tuples</em><em>)</em>) – each item contains a list of values corresponding to the parameters
-given in the <cite>variables</cite> list</li>
-<li><strong>landscape</strong> (<em>2-d array</em>) – zeroes and ones describing the landscape</li>
-<li><strong>par</strong> (<em>ordered dict</em>) – common values for all the problem parameters. See documentation for
-<cite>solve_landscape()</cite></li>
-<li><strong>dx</strong> (<em>float</em>) – length of each edge</li>
-<li><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine. Default is
-6e-6</li>
-<li><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>variables</strong> (<em>list of strings</em>) – names of the varied parameters</p></li>
+<li><p><strong>values</strong> (<em>list of lists</em><em> (or </em><em>tuples</em><em>)</em>) – each item contains a list of values corresponding to the parameters
+given in the <cite>variables</cite> list</p></li>
+<li><p><strong>landscape</strong> (<em>2-d array</em>) – zeroes and ones describing the landscape</p></li>
+<li><p><strong>par</strong> (<em>ordered dict</em>) – common values for all the problem parameters. See documentation for
+<cite>solve_landscape()</cite></p></li>
+<li><p><strong>dx</strong> (<em>float</em>) – length of each edge</p></li>
+<li><p><strong>f_tol</strong> (<em>float</em>) – tolerance for the residue, passed on to the solver routine. Default is
+6e-6</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – print residue of the solution and its maximum and minimum values.
 Notice that the order of appearance of each output is not the same as
-the input if multiprocess is True.</li>
-<li><strong>multiprocess</strong> (<em>bool</em>) – determines whether to use multiprocessing to use multiple cores. True
-by default, in which case the total number of CPUs minus one are used</li>
+the input if multiprocess is True.</p></li>
+<li><p><strong>multiprocess</strong> (<em>bool</em>) – determines whether to use multiprocessing to use multiple cores. True
+by default, in which case the total number of CPUs minus one are used</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>solutions</strong> (<em>list of 2-d arrays</em>) – solutions of each set of parameters, in the same ordering of the input
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>solutions</strong> (<em>list of 2-d arrays</em>) – solutions of each set of parameters, in the same ordering of the input
 values</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p class="rubric">Example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="k">import</span> <span class="o">*</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">lA</span> <span class="o">=</span> <span class="n">image_to_landscape</span><span class="p">(</span><span class="s1">&#39;landA.tif&#39;</span><span class="p">)</span>
@@ -496,27 +635,23 @@ values</p>
 <dt id="landscape.statistics_landscape">
 <code class="descclassname">landscape.</code><code class="descname">statistics_landscape</code><span class="sig-paren">(</span><em>landscape</em>, <em>labels=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/landscape.html#statistics_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#landscape.statistics_landscape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Labels patches and sums total area in each one.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>landscape</strong> (<em>2-d array</em>) – ones and zeroes representing patches and matrix</li>
-<li><strong>labels</strong> (<em>bool</em>) – if True, return the labeled 2-d array landscape</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landscape</strong> (<em>2-d array</em>) – ones and zeroes representing patches and matrix</p></li>
+<li><p><strong>labels</strong> (<em>bool</em>) – if True, return the labeled 2-d array landscape</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>array</strong> (<em>2-d array</em>) – the first line is the area and the second is the total population. The
-first column is the total area and population in the matrix.</li>
-<li><strong>labeled</strong> (<em>tuple</em>) – if <cite>labels</cite> is True, returns a tuple (array, labeled), where the second
-element is the labeled 2-d array landscape</li>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>array</strong> (<em>2-d array</em>) – the first line is the area and the second is the total population. The
+first column is the total area and population in the matrix.</p></li>
+<li><p><strong>labeled</strong> (<em>tuple</em>) – if <cite>labels</cite> is True, returns a tuple (array, labeled), where the second
+element is the labeled 2-d array landscape</p></li>
 </ul>
 </p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -559,8 +694,6 @@ element is the labeled 2-d array landscape</li>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>

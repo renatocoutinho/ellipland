@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>landscape &#8212; ellipland  documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -44,21 +42,21 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="n">par</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span> 
-    <span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="mf">1.</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;Dp&#39;</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;Dm&#39;</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
-    <span class="c1"># interface condition (=Dm/Dp)</span>
-    <span class="c1">#(&#39;g&#39;, 1.), # no longer required</span>
-    <span class="c1"># boundary conditions</span>
-    <span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
-    <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
-    <span class="p">(</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
-    <span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
-    <span class="p">])</span>
-
+<span class="c1">## example parameters</span>
+<span class="c1">#par = OrderedDict([</span>
+<span class="c1">#    (&#39;r&#39;, 0.1),</span>
+<span class="c1">#    (&#39;K&#39;, 1.),</span>
+<span class="c1">#    (&#39;mu&#39;, 0.03),</span>
+<span class="c1">#    (&#39;Dp&#39;, 1e-4),</span>
+<span class="c1">#    (&#39;Dm&#39;, 1e-3),</span>
+<span class="c1">#    # interface condition (=Dm/Dp)</span>
+<span class="c1">#    #(&#39;g&#39;, 1.), # no longer required</span>
+<span class="c1">#    # boundary conditions</span>
+<span class="c1">#    (&#39;left&#39;, [1., 0., 0.]),</span>
+<span class="c1">#    (&#39;right&#39;, [1., 0., 0.]),</span>
+<span class="c1">#    (&#39;top&#39;, [1., 0., 0.]),</span>
+<span class="c1">#    (&#39;bottom&#39;, [1., 0., 0.])</span>
+<span class="c1">#    ])</span>
 <span class="c1"># in km</span>
 <span class="c1">#dx = 0.0286</span>
 <span class="c1"># 35 pixels -&gt; 1km = 1000m</span>
@@ -201,7 +199,8 @@
 
 
 <div class="viewcode-block" id="solve_landscape_ntypes"><a class="viewcode-back" href="../stubs/landscape.html#landscape.solve_landscape_ntypes">[docs]</a><span class="k">def</span> <span class="nf">solve_landscape_ntypes</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">force_positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">force_positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_refine</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Find the stationary solution for a landscape with many types of habitat.</span>
 
 <span class="sd">    Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a</span>
@@ -241,6 +240,12 @@
 <span class="sd">    force_positive : bool</span>
 <span class="sd">        make sure the solution is always non-negative - in a hacky way. Default</span>
 <span class="sd">        False</span>
+<span class="sd">    skip_refine : bool</span>
+<span class="sd">        do not refine the grid to calculate the residual. This can greatly</span>
+<span class="sd">        improve speed, but will generate errors (even silent wrong results) if</span>
+<span class="sd">        the landscape has contiguous interfaces</span>
+<span class="sd">    return_residual : bool</span>
+<span class="sd">        returns only the residual function, without calculating the solution</span>
 <span class="sd">    verbose : bool</span>
 <span class="sd">        print residue of the solution and its maximum and minimum values</span>
 
@@ -318,6 +323,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">newton_krylov</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_refine</span><span class="p">:</span>
+        <span class="c1"># refine the grid to avoid contiguous interfaces</span>
+        <span class="n">landscape</span> <span class="o">=</span> <span class="n">refine_grid</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">/=</span> <span class="mi">2</span>
+
     <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="n">p</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -344,9 +354,9 @@
     <span class="p">(</span><span class="n">at</span><span class="p">,</span> <span class="n">bt</span><span class="p">,</span> <span class="n">ct</span><span class="p">)</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span>
     <span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">bb</span><span class="p">,</span> <span class="n">cb</span><span class="p">)</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span>
 
-    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
         <span class="n">li</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">landscape</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span>
         <span class="n">D</span><span class="p">[</span><span class="n">li</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
@@ -364,13 +374,13 @@
                 <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">8.</span><span class="o">/</span><span class="mi">3</span> <span class="o">*</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">][(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)])</span>
                 <span class="p">)</span>
 
-    <span class="n">Bxleft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">Bxcenter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">Bxright</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">Byleft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">Bycenter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="n">Byright</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">fac</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">Bxleft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+    <span class="n">Bxcenter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+    <span class="n">Bxright</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+    <span class="n">Byleft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+    <span class="n">Bycenter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+    <span class="n">Byright</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float_</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="c1">## direction x</span>
         <span class="c1"># patch type i</span>
         <span class="n">Bxcenter</span><span class="p">[</span><span class="n">Bx</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">factor</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -420,10 +430,13 @@
 
         <span class="k">return</span> <span class="n">D</span><span class="o">*</span><span class="p">(</span><span class="n">d2x</span> <span class="o">+</span> <span class="n">d2y</span><span class="p">)</span><span class="o">/</span><span class="n">dx</span><span class="o">/</span><span class="n">dx</span> <span class="o">+</span> <span class="n">r</span><span class="o">*</span><span class="n">P</span> <span class="o">+</span> <span class="n">c</span><span class="o">*</span><span class="n">P</span><span class="o">**</span><span class="mi">2</span>
 
+    <span class="k">if</span> <span class="n">return_residual</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">residual</span>
+
     <span class="c1"># solve</span>
     <span class="n">guess</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">guess</span><span class="p">[</span><span class="n">guess</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-6</span>
     <span class="n">guess</span><span class="p">[</span><span class="n">guess</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">((</span><span class="o">-</span><span class="n">c</span><span class="o">/</span><span class="n">r</span><span class="p">)[</span><span class="n">guess</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">guess</span><span class="p">[</span><span class="n">guess</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-6</span>
     <span class="n">sol</span> <span class="o">=</span> <span class="n">newton_krylov</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;lgmres&#39;</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="n">f_tol</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">force_positive</span><span class="p">:</span>
         <span class="n">sol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
@@ -431,8 +444,284 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Residual: </span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">abs</span><span class="p">(</span><span class="n">residual</span><span class="p">(</span><span class="n">sol</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;max. pop.: </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sol</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;min. pop.: </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sol</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_refine</span><span class="p">:</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">coarse_grid</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">sol</span></div>
+
+<div class="viewcode-block" id="solve_landscape_ntypes_nspecies"><a class="viewcode-back" href="../stubs/landscape.html#landscape.solve_landscape_ntypes_nspecies">[docs]</a><span class="k">def</span> <span class="nf">solve_landscape_ntypes_nspecies</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">force_positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_refine</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_residual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Find the stationary solution for a given landscape and set of parameters.</span>
+
+<span class="sd">    Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a</span>
+<span class="sd">    stationary solution (or the solution to the elliptical problem) to the</span>
+<span class="sd">    system of 2n equations in 2 dimensions (x is a 2-d vector):</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \\frac{\partial u_{ik}}{\partial t} &amp;= D_k \\nabla^2 u_{ik} + r_{ik} u_{ik} (1-\sum_{j=1}^n \\alpha_j u_{jk}) = 0</span>
+
+<span class="sd">    where i runs over the n species and k over the patch types.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    landscape : 2-d array of ints</span>
+<span class="sd">        describe the landscape, with any number of habitat types</span>
+<span class="sd">    par : list</span>
+<span class="sd">        the first element is the matrix (or dict with tuple keys) of</span>
+<span class="sd">        competition coefficients, including the inverse of carrying capacities,</span>
+<span class="sd">        and the following elements are dicts with parameters as in the</span>
+<span class="sd">        `solve_landscape_ntypes()` function, except for the carrying capacity.</span>
+<span class="sd">    dx : float</span>
+<span class="sd">        length of each edge</span>
+<span class="sd">    f_tol : float</span>
+<span class="sd">        tolerance for the residue, passed on to the solver routine.  Default is</span>
+<span class="sd">        6e-6</span>
+<span class="sd">    force_positive : bool</span>
+<span class="sd">        make sure the solution is always non-negative - in a hacky way. Default</span>
+<span class="sd">        False</span>
+<span class="sd">    skip_refine : bool</span>
+<span class="sd">        do not refine the grid to calculate the residual. This can greatly</span>
+<span class="sd">        improve speed, but will generate errors (even silent wrong results) if</span>
+<span class="sd">        the landscape has contiguous interfaces</span>
+<span class="sd">    return_residual : bool</span>
+<span class="sd">        returns only the residual function, without calculating the solution</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        print residue of the solution and its maximum and minimum values</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    solution : 2-d array of the same shape of the landscape input containing</span>
+<span class="sd">        the solution</span>
+
+<span class="sd">    Boundary and interface conditions</span>
+<span class="sd">    ---------------------------------</span>
+<span class="sd">    External boundaries are of the form</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        a \\nabla u \cdot \hat{n} + b u + c = 0</span>
+
+<span class="sd">    and may be different for left, right, top, bottom.  The derivative of u is</span>
+<span class="sd">    taken along the normal to the boundary.</span>
+
+<span class="sd">    The interfaces between patches and matrix are given by</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        u(x) &amp;= \gamma v(x) \\\\</span>
+<span class="sd">        D_p \\nabla u(x) \cdot \hat{n} &amp;= D_m \\nabla v(x) \cdot \hat{n}</span>
+
+<span class="sd">    where u is a patch and v is the solution in the matrix.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from landscape import *</span>
+<span class="sd">    &gt;&gt;&gt; lA = loadtxt(&#39;landA.txt&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; par = [</span>
+<span class="sd">            [</span>
+<span class="sd">                [[0, 0],</span>
+<span class="sd">                 [0.1, 0.1]],</span>
+<span class="sd">                [[0.1, 0],</span>
+<span class="sd">                 [0.1, 0.1]]</span>
+<span class="sd">            ],</span>
+<span class="sd">            {&#39;r&#39;: [-0.03, 0.1],</span>
+<span class="sd">             &#39;D&#39;: [0.001, 0.0001],</span>
+<span class="sd">             &#39;left&#39;: [1.0, 0.0, 0.0],</span>
+<span class="sd">             &#39;right&#39;: [1.0, 0.0, 0.0],</span>
+<span class="sd">             &#39;top&#39;: [1.0, 0.0, 0.0],</span>
+<span class="sd">             &#39;bottom&#39;: [1.0, 0.0, 0.0]},</span>
+<span class="sd">            {&#39;r&#39;: [0.05, 0.05],</span>
+<span class="sd">             &#39;D&#39;: [0.001, 0.001],</span>
+<span class="sd">             &#39;left&#39;: [1.0, 0.0, 0.0],</span>
+<span class="sd">             &#39;right&#39;: [1.0, 0.0, 0.0],</span>
+<span class="sd">             &#39;top&#39;: [1.0, 0.0, 0.0],</span>
+<span class="sd">             &#39;bottom&#39;: [1.0, 0.0, 0.0]}</span>
+<span class="sd">            ]</span>
+<span class="sd">    &gt;&gt;&gt; sol = solve_landscape_ntypes_nspecies(lA, par, dx)</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">newton_krylov</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_refine</span><span class="p">:</span>
+        <span class="c1"># refine the grid to avoid contiguous interfaces</span>
+        <span class="n">landscape</span> <span class="o">=</span> <span class="n">refine_grid</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">/=</span> <span class="mi">2</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">par</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">resi</span> <span class="o">=</span> <span class="p">[</span> <span class="n">solve_landscape_ntypes</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">p</span><span class="p">,</span>
+        <span class="n">K</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">Inf</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">))),</span> <span class="n">dx</span><span class="p">,</span> <span class="n">skip_refine</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_residual</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">par</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="p">]</span>
+
+    <span class="n">sec_term</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">landscape</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">landscape</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">iproduct</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">lk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">landscape</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
+            <span class="n">sec_term</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">][</span><span class="n">lk</span><span class="p">]</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">residual</span><span class="p">(</span><span class="n">P</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">force_positive</span><span class="p">:</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+        <span class="c1"># loops are for lazy people</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">Pi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">P</span><span class="p">):</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">resi</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">Pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">Pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">sec_term</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">*</span> <span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">if</span> <span class="n">return_residual</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">residual</span>
+
+    <span class="c1"># build guess based on where growth is positive</span>
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">landscape</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">landscape</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">lk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">landscape</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
+            <span class="n">rik</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">rik</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">guess</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:][</span><span class="n">lk</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-6</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">guess</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:][</span><span class="n">lk</span><span class="p">]</span> <span class="o">=</span>  <span class="n">rik</span> <span class="o">/</span> <span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c1"># solve</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">newton_krylov</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;lgmres&#39;</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="n">f_tol</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">force_positive</span><span class="p">:</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Residuals:&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span> <span class="s1">&#39;</span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residual</span><span class="p">(</span><span class="n">sol</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;max. pops.:&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span> <span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sol</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;min. pops.:&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span> <span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sol</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="p">])</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_refine</span><span class="p">:</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">coarse_grid</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sol</span></div>
+
+<div class="viewcode-block" id="solve_landscape_nspecies"><a class="viewcode-back" href="../stubs/landscape.html#landscape.solve_landscape_nspecies">[docs]</a><span class="k">def</span> <span class="nf">solve_landscape_nspecies</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">force_positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_refine</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Find the stationary solution for a given landscape and set of parameters.</span>
+
+<span class="sd">    Uses a Newton-Krylov solver with LGMRES sparse inverse method to find a</span>
+<span class="sd">    stationary solution (or the solution to the elliptical problem) to the</span>
+<span class="sd">    system of 2n equations in 2 dimensions (x is a 2-d vector):</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \\frac{\partial u_i}{\partial t} &amp;= D_p \\nabla^2 u_i + r_i u_i (1-\sum_{j=1}^n \\alpha_j u_j) = 0 \\text{ in a patch} \\\\</span>
+<span class="sd">        \\frac{\partial v_i}{\partial t} &amp;= D_m \\nabla^2 v_i - \mu_i v_i = 0 \\text{ in the matrix}</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function preserves the original interface, but internally it calls the</span>
+<span class="sd">    newer `solve_landscape_ntypes_nspecies()`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    landscape : a 2-d array (of ints) describing the landscape, with 1 on</span>
+<span class="sd">        patches and 0 on matrix</span>
+<span class="sd">    par : a ordered dict containing parameters in the following order:</span>
+<span class="sd">        r: list of reproductive rates on patches</span>
+<span class="sd">        alpha: matrix of interaction parameters on patches (diagonals are minus the inverse of carrying capacity)</span>
+<span class="sd">        mu: list of mortality rates in the matrix</span>
+<span class="sd">        Dp: list of diffusivities on patches</span>
+<span class="sd">        Dm: list of diffusivities in the matrix</span>
+<span class="sd">        g: habitat preference parameter \gamma, usually less than one. See interface conditions below</span>
+<span class="sd">        left: (a, b, c): external boundary conditions at left border</span>
+<span class="sd">        right: (a, b, c): external boundary conditions at right border</span>
+<span class="sd">        top: (a, b, c): external boundary conditions at top border</span>
+<span class="sd">        bottom: (a, b, c): external boundary conditions at bottom border</span>
+
+<span class="sd">    dx : float</span>
+<span class="sd">        length of each edge</span>
+<span class="sd">    f_tol : float</span>
+<span class="sd">        tolerance for the residue, passed on to the solver routine.  Default is</span>
+<span class="sd">        6e-6</span>
+<span class="sd">    force_positive : bool</span>
+<span class="sd">        make sure the solution is always non-negative - in a hacky way. Default</span>
+<span class="sd">        False</span>
+<span class="sd">    skip_refine : bool</span>
+<span class="sd">        do not refine the grid to calculate the residual. This can greatly</span>
+<span class="sd">        improve speed, but will generate errors (even silent wrong results) if</span>
+<span class="sd">        the landscape has contiguous interfaces</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        print residue of the solution and its maximum and minimum values</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    solution : 2-d array of the same shape of the landscape input containing</span>
+<span class="sd">        the solution</span>
+
+<span class="sd">    Boundary and interface conditions</span>
+<span class="sd">    ---------------------------------</span>
+<span class="sd">    External boundaries are of the form</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        a \\nabla u \cdot \hat{n} + b u + c = 0</span>
+
+<span class="sd">    and may be different for left, right, top, bottom.  The derivative of u is</span>
+<span class="sd">    taken along the normal to the boundary.</span>
+
+<span class="sd">    The interfaces between patches and matrix are given by</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        u(x) &amp;= \gamma v(x) \\\\</span>
+<span class="sd">        D_p \\nabla u(x) \cdot \hat{n} &amp;= D_m \\nabla v(x) \cdot \hat{n}</span>
+
+<span class="sd">    where u is a patch and v is the solution in the matrix. These conditions</span>
+<span class="sd">    are handled using an assymetric finite difference scheme for the 2nd</span>
+<span class="sd">    derivative:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        u_xx(x) = (4/3/h**2) (u(x-h) - 3 u(x) + 2 u(x+h/2))</span>
+
+<span class="sd">    with the approximations at the interface:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        u(x+h/2) = (Dm*v(x+h)+Dp*u(x))/(Dp+Dm*g)</span>
+
+<span class="sd">    if u(x) is in a patch and v(x+h) is in the matrix, or</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        v(x+h/2) = g*(Dm*v(x)+Dp*u(x+h))/(Dp+Dm*g)</span>
+
+<span class="sd">    if v(x) is in the matrix and u(x+h) is in a patch.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from landscape import *</span>
+<span class="sd">    &gt;&gt;&gt; parn = OrderedDict([</span>
+<span class="sd">        (&#39;rp&#39;, [0.1, 0.05]),</span>
+<span class="sd">        (&#39;rm&#39;, [-0.03, 0.05]),</span>
+<span class="sd">        (&#39;alphap&#39;, [[0.1, 0], [0.1, 0.1]]),</span>
+<span class="sd">        (&#39;alpham&#39;, [[0., 0.], [0.1, 0.1]]),</span>
+<span class="sd">        (&#39;Dp&#39;, [1e-4, 1e-3]),</span>
+<span class="sd">        (&#39;Dm&#39;, [1e-3, 1e-3]),</span>
+<span class="sd">        # interface condition can be omitted!</span>
+<span class="sd">        #(&#39;g&#39;, [.1, 1.]),</span>
+<span class="sd">        # boundary conditions</span>
+<span class="sd">        (&#39;left&#39;, [1., 0., 0.]),</span>
+<span class="sd">        (&#39;right&#39;, [1., 0., 0.]),</span>
+<span class="sd">        (&#39;top&#39;, [1., 0., 0.]),</span>
+<span class="sd">        (&#39;bottom&#39;, [1., 0., 0.])</span>
+<span class="sd">        ])</span>
+<span class="sd">    &gt;&gt;&gt; lA = loadtxt(&#39;landA.txt&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; sol = solve_landscape_nspecies(lA, parn, dx)</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;alpham&#39;</span><span class="p">],</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;alphap&#39;</span><span class="p">]</span> <span class="p">]</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="p">[</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;rm&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;rp&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="n">D</span> <span class="o">=</span> <span class="p">[</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="o">**</span><span class="p">{</span> <span class="n">k</span><span class="p">:</span> <span class="n">par</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">]</span> <span class="p">}</span>
+            <span class="p">)</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="p">[</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;rm&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;rp&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="n">D</span> <span class="o">=</span> <span class="p">[</span><span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dm&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">par</span><span class="p">[</span><span class="s1">&#39;Dp&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="o">**</span><span class="p">{</span> <span class="n">k</span><span class="p">:</span> <span class="n">par</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">]</span> <span class="p">}</span>
+            <span class="p">)</span>
+    <span class="n">newpar</span> <span class="o">=</span> <span class="p">[</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">solve_landscape_ntypes_nspecies</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">newpar</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">f_tol</span><span class="o">=</span><span class="n">f_tol</span><span class="p">,</span>
+            <span class="n">skip_refine</span><span class="o">=</span><span class="n">skip_refine</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="find_interfaces"><a class="viewcode-back" href="../stubs/landscape.html#landscape.find_interfaces">[docs]</a><span class="k">def</span> <span class="nf">find_interfaces</span><span class="p">(</span><span class="n">landscape</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Helper function that marks where are the internal boundaries.&#39;&#39;&#39;</span>
@@ -469,8 +758,8 @@
     <span class="n">By</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">iproduct</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
-            <span class="n">Bx</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ax</span> <span class="o">==</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="o">**</span><span class="n">j</span><span class="p">)</span>
-            <span class="n">By</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ay</span> <span class="o">==</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="o">**</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">Bx</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ax</span> <span class="o">==</span> <span class="mi">2</span><span class="o">**</span><span class="n">j</span> <span class="o">-</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">By</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Ay</span> <span class="o">==</span> <span class="mi">2</span><span class="o">**</span><span class="n">j</span> <span class="o">-</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">Bx</span><span class="p">,</span> <span class="n">By</span></div>
 
@@ -629,6 +918,16 @@
 <div class="viewcode-block" id="refine_grid"><a class="viewcode-back" href="../stubs/landscape.html#landscape.refine_grid">[docs]</a><span class="k">def</span> <span class="nf">refine_grid</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Increase the resolution of a landscape grid by a factor of n.&#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">n</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="coarse_grid"><a class="viewcode-back" href="../stubs/landscape.html#landscape.coarse_grid">[docs]</a><span class="k">def</span> <span class="nf">coarse_grid</span><span class="p">(</span><span class="n">landscape</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Decrease resolution of a grid by a factor of 2.</span>
+
+<span class="sd">    Each square of 2 by 2 pixels over the last two axes is replaced by a single</span>
+<span class="sd">    pixel with its average value.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">landscape</span><span class="p">[</span><span class="o">...</span><span class="p">,::</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">landscape</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,:])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="o">...</span><span class="p">,:,::</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="o">...</span><span class="p">,:,</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span></div>
 
 <div class="viewcode-block" id="image_to_landscape"><a class="viewcode-back" href="../stubs/landscape.html#landscape.image_to_landscape">[docs]</a><span class="k">def</span> <span class="nf">image_to_landscape</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Converts an image (in any RGB format) to a 2d array of ones and zeroes.</span>
@@ -830,6 +1129,29 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+<span class="k">def</span> <span class="nf">plot_nspecies</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">solutions</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.gridspec</span> <span class="k">import</span> <span class="n">GridSpec</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">solutions</span><span class="p">)</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">max</span><span class="p">([</span> <span class="n">s</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">solutions</span> <span class="p">]))</span>
+    <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">landscape</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">landscape</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">dx</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">GridSpec</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">height_ratios</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">landscape</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">binary</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+            <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">solutions</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">jet</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+                <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">K</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span>
+
 </pre></div>
 
           </div>
@@ -871,8 +1193,6 @@
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
