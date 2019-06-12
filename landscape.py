@@ -895,8 +895,8 @@ def coarse_grid(landscape):
     a = (landscape[...,::2,:] + landscape[...,1::2,:]) / 2
     return (a[...,:,::2] + a[...,:,1::2]) / 2
 
-def image_to_landscape(image):
-    '''Converts an image (in any RGB format) to a 2d array of ones and zeroes.
+def image_to_landscape(image, n=2):
+    '''Converts an image to a 2d array of integers from 0 to n-1.
 
     Most image formats (including TIFF) requires PIL.
 
@@ -907,18 +907,52 @@ def image_to_landscape(image):
 
     Returns
     -------
-    landscape : 2-d array 
-        ones and zeroes, where ones correspond to darker shades in the original
-        image, which should correspond to patch, while the lighter shades
-        represent the matrix
+    landscape : 2-d array
+        all values are integers from 0 to n-1, where zeroes correspond to
+        lighter shades in the original image, and darker shades to higher
+        values, so that each value corresponds to a distinct type of habitat
 
     '''
-    from scipy.ndimage import imread
+    from matplotlib.image import imread
+    from scipy.ndimage.measurements import histogram
 
-    # maybe use flipud/fliplr here?
     M = imread(image).sum(axis=2)[::-1,:]
-    M = np.around(M/M.max())
-    return 1 - M.astype(int16)
+    L = np.zeros_like(M)
+    nbins = max(20, n*4)
+    freq = histogram(M, M.min(), M.max(), nbins)
+    bins = np.linspace(M.min(), M.max(), nbins)
+    peaks = sorted(freq.argsort()[-n:])
+    delims = [bins[0]] + [ bins[(peaks[i+1] + peaks[i])//2] for i in range(n-1) ] + [bins[-1]+1]
+    for i in range(n):
+        L[ (M > delims[i]) & (M < delims[i+1]) ] = i
+    #M = np.around(M/M.max())
+    #return 1 - M.astype(np.int16)
+    return L
+
+def swap_values(landscape, swaps):
+    '''Substitute values of a landscape
+
+
+    Parameters
+    ----------
+    landscape : 2-d array
+    swaps: list of tuples
+        each item if of the form (original_value, new_value)
+
+    Returns
+    -------
+    landscape : 2-d array
+
+    Example
+    -------
+    >>> # rotation of 3 values
+    >>> newl = swap_values(l, [(0,1), (1,2), (2,0)])
+
+    '''
+    newl = landscape.copy()
+    for i,j in swaps:
+        newl[ landscape == i ] = j
+    return newl
 
 def random_landscape(cover, frag, size, radius=1, norm='taxicab'):
     '''Generates random square landscapes with a given cover and fragmentation.
